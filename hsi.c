@@ -8,20 +8,20 @@
 
 #include "hsi.h"
 
-#ifndef __AVR__
+#ifdef SIMULATOR
 #include "simulator.h"
 #endif
 
 #include <stdint.h>
 
-#ifdef __AVR__
+#ifndef SIMULATOR
 #include <avr/io.h>
 #endif
 
 uint8_t HSI_readPin(HSI_dio_struct io)
 {
 	uint8_t result;
-#ifdef __AVR__
+#ifndef SIMULATOR
 	result = *io.port & _BV(io.pin);
 
 	if (result != 0)
@@ -34,7 +34,7 @@ uint8_t HSI_readPin(HSI_dio_struct io)
 
 void HSI_writePin(HSI_dio_struct io, uint8_t value)
 {
-#ifdef __AVR__
+#ifndef SIMULATOR
 	if (value == 0) {
 		*io.port &= ((*io.port) & (~_BV(io.pin)));
 	}

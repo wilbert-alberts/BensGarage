@@ -49,9 +49,11 @@ void SIM_initialize(Garage_io_struct* io)
 	map[10].io = io->trafficGreen;
 	map[11].io = io->ambientLight;
 
+#ifdef SIMULATOR
 	time = 0;
 	infile = fopen(SIM_GARAGE_INFILE, "r");
 	outfile = fopen(SIM_GARAGE_INFILE, "w");
+#endif
 
 	fprintf(outfile, "leftOpenedSensor\t");
 	fprintf(outfile, "leftClosedSensor\t");
@@ -65,8 +67,6 @@ void SIM_initialize(Garage_io_struct* io)
 	fprintf(outfile, "trafficYellow\t");
 	fprintf(outfile, "trafficGreen\t");
 	fprintf(outfile, "ambientLight\n");
-
-
 }
 
 void SIM_advanceTime()

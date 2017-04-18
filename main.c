@@ -7,7 +7,7 @@
 
 #include <unistd.h>
 
-#ifdef __AVR__
+#ifndef SIMULATOR
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #endif
@@ -27,17 +27,17 @@ int main(int argc, char* argv[]) {
 	Garage garage;
 
 	initIO(&io);
-	SIM_initialize(&io);
 
 	garage = Garage_construct(&io);
 
-	installTimer();
+#ifndef SIMULATOR
 
-#ifdef __AVR__
+	installTimer();
 	while (1);
 
-
 #else
+
+	SIM_initialize(&io);
 	while (1) {
 		Log("tick");
 		SIM_advanceTime();
@@ -46,22 +46,20 @@ int main(int argc, char* argv[]) {
 
 		usleep(1000000);
 	}
+
 #endif
 }
 
+#ifndef SIMULATOR
 static void installTimer()
 {
 
-#ifdef __AVR__
 	OCR1A = 125; // prescaler 64, clockfreq 8 Mhz, compare 125 implies delay 1ms.
 	TIMSK1 |= _BV(OCIE1A); // enable interrupt on compare match
 	TCCR1B |= _BV(WGM12); // set clear counter on timer compare
 
 	TCCR1B |= (_BV(CS11) | _BV(CS10)); // Start timer (by setting prescaler)
-#endif
 }
-
-#ifdef __AVR__
 
 ISR(TIMER1_COMPA_vect)
 {
@@ -73,42 +71,78 @@ ISR(TIMER1_COMPA_vect)
 
 
 static void initIO(Garage_io_struct* io) {
-#ifdef __AVR__
+#ifndef SIMULATOR
 	io->ambientLight.port = &PORTB;
 	io->ambientLight.pin = 1;
 
 	io->leftOpenedSensor.port = &PORTB;
-	io->leftOpenedSensor.pin = 1;
+	io->leftOpenedSensor.pin = 2;
 
 	io->leftClosedSensor.port = &PORTB;
-	io->leftClosedSensor.pin = 1;
+	io->leftClosedSensor.pin = 3;
 
 	io->leftGateSensor.port = &PORTB;
-	io->leftGateSensor.pin = 1;
+	io->leftGateSensor.pin = 4;
 
 	io->leftRemote.port = &PORTB;
-	io->leftRemote.pin = 1;
+	io->leftRemote.pin = 5;
 
 	io->rightOpenedSensor.port = &PORTB;
-	io->rightOpenedSensor.pin = 1;
+	io->rightOpenedSensor.pin = 6;
 
 	io->rightClosedSensor.port = &PORTB;
-	io->rightClosedSensor.pin = 1;
+	io->rightClosedSensor.pin = 7;
 
 	io->rightGateSensor.port = &PORTB;
-	io->rightGateSensor.pin = 1;
+	io->rightGateSensor.pin = 8;
 
 	io->rightRemote.port = &PORTB;
-	io->rightRemote.pin = 1;
+	io->rightRemote.pin = 9;
 
 	io->trafficRed.port = &PORTB;
-	io->trafficRed.pin = 1;
+	io->trafficRed.pin = 10;
 
 	io->trafficYellow.port = &PORTB;
-	io->trafficYellow.pin = 1;
+	io->trafficYellow.pin = 11;
 
 	io->trafficGreen.port = &PORTB;
-	io->trafficGreen.pin = 1;
+	io->trafficGreen.pin = 12;
+#else
+	io->ambientLight.port = NULL;
+	io->ambientLight.pin = 1;
+
+	io->leftOpenedSensor.port = NULL;
+	io->leftOpenedSensor.pin = 2;
+
+	io->leftClosedSensor.port = NULL;
+	io->leftClosedSensor.pin = 3;
+
+	io->leftGateSensor.port = NULL;
+	io->leftGateSensor.pin = 4;
+
+	io->leftRemote.port = NULL;
+	io->leftRemote.pin = 5;
+
+	io->rightOpenedSensor.port = NULL;
+	io->rightOpenedSensor.pin = 6;
+
+	io->rightClosedSensor.port = NULL;
+	io->rightClosedSensor.pin = 7;
+
+	io->rightGateSensor.port = NULL;
+	io->rightGateSensor.pin = 8;
+
+	io->rightRemote.port = NULL;
+	io->rightRemote.pin = 9;
+
+	io->trafficRed.port = NULL;
+	io->trafficRed.pin = 10;
+
+	io->trafficYellow.port = NULL;
+	io->trafficYellow.pin = 11;
+
+	io->trafficGreen.port = NULL;
+	io->trafficGreen.pin = 12;
 #endif
 
 }
