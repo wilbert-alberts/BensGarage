@@ -70,7 +70,8 @@ void Debouncer_sample(Debouncer debouncer) {
 }
 
 void Debouncer_sampleAllDebouncers() {
-	for (int i = 0; i < debouncer_nrDebouncers; i++) {
+	int i=0;
+	for (i = 0; i < debouncer_nrDebouncers; i++) {
 		Debouncer_sample(&debouncer_debouncers[i]);
 	}
 }

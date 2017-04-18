@@ -6,6 +6,14 @@
  */
 
 
+#include "hsi.h"
+
+#include "simulator.h"
+
+#include <stdint.h>
+#include <stdio.h>
+
+
 #define SIM_GARAGE_INFILE ("garage.in.txt")
 #define SIM_GARAGE_OUTFILE ("garage.out.txt")
 #define SIM_SIZE_OF_MAP (sizeof(map)/sizeof(SIM_map))
@@ -20,6 +28,11 @@ static SIM_map map[12];
 static uint32_t time = 0;
 static FILE* infile;
 static FILE* outfile;
+
+static void SIM_readNewState();
+static void SIM_writeCurrentState();
+static int  SIM_findMapEntry(const HSI_dio_struct*);
+
 
 void SIM_initialize(Garage_io_struct* io)
 {
@@ -58,9 +71,9 @@ void SIM_initialize(Garage_io_struct* io)
 
 void SIM_advanceTime()
 {
-	writeCurrentState();
+	SIM_writeCurrentState();
 	time++;
-	readNewState();
+	SIM_readNewState();
 }
 
 uint8_t SIM_readPin(HSI_dio_struct io)
@@ -83,9 +96,10 @@ void SIM_writePin(HSI_dio_struct io, uint8_t value)
 }
 
 int SIM_findMapEntry(const HSI_dio_struct* io) {
-	for (int i=0; i<SIM_SIZE_OF_MAP; i++) {
-		if ((io.pin == map[i].io.pin) &&
-		    (io.port == map[i].io.port)) {
+	int i;
+	for (i=0; i<SIM_SIZE_OF_MAP; i++) {
+		if ((io->pin == map[i].io.pin) &&
+		    (io->port == map[i].io.port)) {
 			return i;
 		}
 	}
@@ -94,8 +108,9 @@ int SIM_findMapEntry(const HSI_dio_struct* io) {
 
 void SIM_writeCurrentState()
 {
-	fprintf(outfile, "%d\t", time);
-	for (int i=0; i<SIM_SIZE_OF_MAP; i++) {
+	int i;
+	fprintf(outfile, "%ld\t", time);
+	for (i=0; i<SIM_SIZE_OF_MAP; i++) {
 		fprintf(outfile, "%d\t", map[i].value);
 	}
 	fprintf(outfile, "\n");
@@ -103,15 +118,16 @@ void SIM_writeCurrentState()
 
 void SIM_readNewState()
 {
+	int i;
 	static int nextEvent=0;
 	static int nextValues[SIM_SIZE_OF_MAP] = {0};
 
 	while (time>=nextEvent) {
-		for (int i=0; i<SIM_SIZE_OF_MAP; i++) {
+		for (i=0; i<SIM_SIZE_OF_MAP; i++) {
 			map[i].value = nextValues[i];
 		}
 		fscanf(infile, "%d", &nextEvent);
-		for (int i=0; i<SIM_SIZE_OF_MAP; i++) {
+		for (i=0; i<SIM_SIZE_OF_MAP; i++) {
 			fscanf(infile, "%d", &nextValues[i]);
 		}
 	}

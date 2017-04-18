@@ -65,7 +65,8 @@ void Timer_tick(Timer timer) {
 
 void Timer_tickAllTimers()
 {
-	for (int i=0; i<timer_nrTimers; i++) {
+	int i;
+	for (i=0; i<timer_nrTimers; i++) {
 		Timer_tick(&timer_Timers[i]);
 	}
 }
