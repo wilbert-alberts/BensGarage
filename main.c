@@ -16,6 +16,7 @@
 #include "garage.h"
 #include "debouncer.h"
 #include "timer.h"
+#include "simulator.h"
 
 static void initIO(Garage_io_struct* io);
 static void installTimer();
@@ -26,6 +27,7 @@ int main(int argc, char* argv[]) {
 	Garage garage;
 
 	initIO(&io);
+	SIM_initialize(&io);
 
 	garage = Garage_construct(&io);
 
@@ -38,6 +40,7 @@ int main(int argc, char* argv[]) {
 #else
 	while (1) {
 		Log("tick");
+		SIM_advanceTime();
 		Debouncer_sampleAllDebouncers();
 		Timer_tickAllTimers();
 
