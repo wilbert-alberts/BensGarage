@@ -52,7 +52,7 @@ void SIM_initialize(Garage_io_struct* io)
 #ifdef SIMULATOR
 	time = 0;
 	infile = fopen(SIM_GARAGE_INFILE, "r");
-	outfile = fopen(SIM_GARAGE_INFILE, "w");
+	outfile = fopen(SIM_GARAGE_OUTFILE, "w");
 #endif
 
 	fprintf(outfile, "leftOpenedSensor\t");
@@ -67,6 +67,7 @@ void SIM_initialize(Garage_io_struct* io)
 	fprintf(outfile, "trafficYellow\t");
 	fprintf(outfile, "trafficGreen\t");
 	fprintf(outfile, "ambientLight\n");
+	fsync(fileno(outfile));
 }
 
 void SIM_advanceTime()
@@ -109,26 +110,28 @@ int SIM_findMapEntry(const HSI_dio_struct* io) {
 void SIM_writeCurrentState()
 {
 	int i;
-	fprintf(outfile, "%ld\t", time);
+	fprintf(outfile, "%ud\t", time);
 	for (i=0; i<SIM_SIZE_OF_MAP; i++) {
 		fprintf(outfile, "%d\t", map[i].value);
 	}
 	fprintf(outfile, "\n");
+	fsync(fileno(outfile));
 }
 
 void SIM_readNewState()
 {
 	int i;
+	int eof = 0;
 	static int nextEvent=0;
 	static int nextValues[SIM_SIZE_OF_MAP] = {0};
 
-	while (time>=nextEvent) {
+	while ((time>=nextEvent) && (eof>=0)) {
 		for (i=0; i<SIM_SIZE_OF_MAP; i++) {
 			map[i].value = nextValues[i];
 		}
-		fscanf(infile, "%d", &nextEvent);
-		for (i=0; i<SIM_SIZE_OF_MAP; i++) {
-			fscanf(infile, "%d", &nextValues[i]);
+		eof = fscanf(infile, "%d\t", &nextEvent);
+		for (i=0; (eof>0) && (i<SIM_SIZE_OF_MAP); i++) {
+			eof = fscanf(infile, "%d\t", &nextValues[i]);
 		}
 	}
 }
