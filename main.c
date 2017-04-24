@@ -39,12 +39,11 @@ int main(int argc, char* argv[]) {
 
 	SIM_initialize(&io);
 	while (1) {
-		Log("tick");
-		SIM_advanceTime();
 		Debouncer_sampleAllDebouncers();
 		Timer_tickAllTimers();
+		SIM_advanceTime();
 
-		usleep(1000000);
+		usleep(1000);
 	}
 
 #endif
@@ -109,40 +108,40 @@ static void initIO(Garage_io_struct* io) {
 	io->trafficGreen.pin = 12;
 #else
 	io->ambientLight.port = NULL;
-	io->ambientLight.pin = 1;
+	io->ambientLight.pin = 0;
 
 	io->leftOpenedSensor.port = NULL;
-	io->leftOpenedSensor.pin = 2;
+	io->leftOpenedSensor.pin = 1;
 
 	io->leftClosedSensor.port = NULL;
-	io->leftClosedSensor.pin = 3;
+	io->leftClosedSensor.pin = 2;
 
 	io->leftGateSensor.port = NULL;
-	io->leftGateSensor.pin = 4;
+	io->leftGateSensor.pin = 3;
 
 	io->leftRemote.port = NULL;
-	io->leftRemote.pin = 5;
+	io->leftRemote.pin = 4;
 
 	io->rightOpenedSensor.port = NULL;
-	io->rightOpenedSensor.pin = 6;
+	io->rightOpenedSensor.pin = 5;
 
 	io->rightClosedSensor.port = NULL;
-	io->rightClosedSensor.pin = 7;
+	io->rightClosedSensor.pin = 6;
 
 	io->rightGateSensor.port = NULL;
-	io->rightGateSensor.pin = 8;
+	io->rightGateSensor.pin = 7;
 
 	io->rightRemote.port = NULL;
-	io->rightRemote.pin = 9;
+	io->rightRemote.pin = 8;
 
 	io->trafficRed.port = NULL;
-	io->trafficRed.pin = 10;
+	io->trafficRed.pin = 9;
 
 	io->trafficYellow.port = NULL;
-	io->trafficYellow.pin = 11;
+	io->trafficYellow.pin = 10;
 
 	io->trafficGreen.port = NULL;
-	io->trafficGreen.pin = 12;
+	io->trafficGreen.pin = 11;
 #endif
 
 }

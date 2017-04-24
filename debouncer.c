@@ -40,6 +40,7 @@ Debouncer Debouncer_construct(const CB_callbackClient* whenHigh,
 		CB_register(&result->whenLowCB, whenLow->callback, whenLow->obj,
 				whenLow->context);
 		result->value = HSI_readPin(io);
+		result->remaining = DEBOUNCER_STABLEDURATION;
 
 		return (Debouncer) result;
 	} else {
@@ -52,6 +53,8 @@ void Debouncer_sample(Debouncer debouncer) {
 	Debouncer_struct* obj = (Debouncer_struct*) debouncer;
 
 	uint8_t v = HSI_readPin(obj->io);
+
+	//printf("Sampling debouncer %d, current value: %d, read: %d, remaining: %d\n", obj->io.pin, obj->value, v, obj->remaining);
 
 	if (v != obj->value) {
 		obj->remaining--;

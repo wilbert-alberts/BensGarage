@@ -36,7 +36,7 @@ void Log_error(const char* f, const char* msg) {
 #ifndef SIMULATOR
 #else
 	fprintf(stderr, "Error in %s: %s\n", f, msg);
-	exit(0);
+	//exit(0);
 #endif
 }
 

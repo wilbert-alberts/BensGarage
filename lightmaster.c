@@ -44,7 +44,7 @@ LightMaster LM_construct(HSI_dio_struct red, HSI_dio_struct yellow,
 
 	result->ambient = ambient;
 	result->ambientTimer = Timer_construct();
-	CB_callbackClient cb = { result, LM_ambientOffCB, NULL };
+	CB_callbackClient cb = { result, NULL, LM_ambientOffCB };
 	result->ambientOffCB = cb;
 
 	Log_exit(__func__, "");

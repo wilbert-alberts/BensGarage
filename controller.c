@@ -71,14 +71,14 @@ Controller Controller_construct(HSI_dio_struct openedSensor,
 
 	Controller_struct* result = calloc(1, sizeof(Controller_struct));
 
-	CB_callbackClient openedCB = { result, Controller_doorOpened, NULL };
-	CB_callbackClient inbetweenCB = { result, Controller_doorInBetween, NULL };
-	CB_callbackClient closedCB = { result, Controller_doorClosed, NULL };
+	CB_callbackClient openedCB = { result, NULL, Controller_doorOpened};
+	CB_callbackClient inbetweenCB = { result, NULL, Controller_doorInBetween};
+	CB_callbackClient closedCB = { result, NULL, Controller_doorClosed };
 	result->door = Door_construct(&openedCB, &inbetweenCB, &closedCB,
 			openedSensor, closedSensor);
 
-	CB_callbackClient gateHighCB = { result, Controller_gateBlocked, NULL };
-	CB_callbackClient gateLowCB = { result, Controller_gateFree, NULL };
+	CB_callbackClient gateHighCB = { result, NULL, Controller_gateBlocked };
+	CB_callbackClient gateLowCB = { result, NULL, Controller_gateFree };
 	result->gate = Debouncer_construct(&gateHighCB, &gateLowCB, gateSensor);
 
 	result->cbRed = cbRed;
