@@ -8,6 +8,7 @@
 #include "hsi.h"
 
 #include "simulator.h"
+#include "log.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -17,6 +18,8 @@
 #define SIM_GARAGE_INFILE ("garage.in.txt")
 #define SIM_GARAGE_OUTFILE ("garage.out.txt")
 #define SIM_SIZE_OF_MAP (sizeof(SIM_currentValues)/sizeof(SIM_map))
+
+#define SIM_NR_INPUTS (6)
 
 typedef struct {
 	HSI_dio_struct io;
@@ -29,46 +32,65 @@ static uint32_t SIM_time = 0;
 static FILE* SIM_infile;
 static FILE* SIM_outfile;
 
+static uint8_t SIM_nextValues[12];
+static uint32_t SIM_nextEvent;
+
 static void SIM_readNewState();
 static void SIM_writeCurrentState();
 static int SIM_findMapEntry(const HSI_dio_struct*);
-static int SIM_readNewLine(int* time, int* nextValues, int nrValues);
+static int SIM_readNewLine(uint32_t* time, uint8_t* nextValues, int nrValues);
 static int SIM_compareState(int nrValues, int* v1, const SIM_map* map);
 
 
 void SIM_initialize(Garage_io_struct* io) {
-	SIM_currentValues[io->leftOpenedSensor.pin].io = io->leftOpenedSensor;
-	SIM_currentValues[io->leftClosedSensor.pin].io = io->leftClosedSensor;
-	SIM_currentValues[io->leftGateSensor.pin].io = io->leftGateSensor;
-	SIM_currentValues[io->leftRemote.pin].io = io->leftRemote;
-	SIM_currentValues[io->rightOpenedSensor.pin].io = io->rightOpenedSensor;
-	SIM_currentValues[io->rightClosedSensor.pin].io = io->rightClosedSensor;
-	SIM_currentValues[io->rightGateSensor.pin].io = io->rightGateSensor;
-	SIM_currentValues[io->rightRemote.pin].io = io->rightRemote;
-	SIM_currentValues[io->trafficRed.pin].io = io->trafficRed;
-	SIM_currentValues[io->trafficYellow.pin].io = io->trafficYellow;
-	SIM_currentValues[io->trafficGreen.pin].io = io->trafficGreen;
-	SIM_currentValues[io->ambientLight.pin].io = io->ambientLight;
+	int i;
 
-	SIM_currentValues[io->leftOpenedSensor.pin].ioname = "leftOpenedSensor";
-	SIM_currentValues[io->leftClosedSensor.pin].ioname = "leftClosedSensor";
-	SIM_currentValues[io->leftGateSensor.pin].ioname = "leftGateSensor";
-	SIM_currentValues[io->leftRemote.pin].ioname = "leftRemote";
-	SIM_currentValues[io->rightOpenedSensor.pin].ioname = "rightOpenedSensor";
-	SIM_currentValues[io->rightClosedSensor.pin].ioname = "rightClosedSensor";
-	SIM_currentValues[io->rightGateSensor.pin].ioname = "rightGateSensor";
-	SIM_currentValues[io->rightRemote.pin].ioname = "rightRemote";
-	SIM_currentValues[io->trafficRed.pin].ioname = "trafficRed";
-	SIM_currentValues[io->trafficYellow.pin].ioname = "trafficYellow";
-	SIM_currentValues[io->trafficGreen.pin].ioname = "trafficGreen";
-	SIM_currentValues[io->ambientLight.pin].ioname = "ambientLight";
+	// Note: first SIM_NR_INPUTS must be inputs!
 
-#ifdef SIMULATOR
+	SIM_currentValues[0].io = io->leftOpenedSensor;
+	SIM_currentValues[1].io = io->leftClosedSensor;
+	SIM_currentValues[2].io = io->leftGateSensor;
+	SIM_currentValues[3].io = io->rightOpenedSensor;
+	SIM_currentValues[4].io = io->rightClosedSensor;
+	SIM_currentValues[5].io = io->rightGateSensor;
+
+	SIM_currentValues[6].io = io->trafficRed;
+	SIM_currentValues[7].io = io->trafficYellow;
+	SIM_currentValues[8].io = io->trafficGreen;
+	SIM_currentValues[9].io = io->ambientLight;
+
+	SIM_currentValues[10].io = io->leftRemote;
+	SIM_currentValues[11].io = io->rightRemote;
+
+
+	SIM_currentValues[0].ioname = "leftOpenedSensor";
+	SIM_currentValues[1].ioname = "leftClosedSensor";
+	SIM_currentValues[2].ioname = "leftGateSensor";
+	SIM_currentValues[3].ioname = "rightOpenedSensor";
+	SIM_currentValues[4].ioname = "rightClosedSensor";
+	SIM_currentValues[5].ioname = "rightGateSensor";
+
+	SIM_currentValues[6].ioname = "trafficRed";
+	SIM_currentValues[7].ioname = "trafficYellow";
+	SIM_currentValues[8].ioname = "trafficGreen";
+	SIM_currentValues[9].ioname = "ambientLight";
+
+	SIM_currentValues[10].ioname = "leftRemote";
+	SIM_currentValues[11].ioname = "rightRemote";
+
+	// Set initial state:
+	//   All doors closed, no gate blocked all lights off.
+	for (i=0; i<11; i++) {
+		SIM_currentValues[i].value = 0;
+		SIM_nextValues[i] = 0;
+	}
+	SIM_currentValues[1].value = 1;
+	SIM_currentValues[4].value = 1;
+	SIM_nextValues[1] = 1;
+	SIM_nextValues[4] = 1;
+
 	SIM_time = 0;
-	SIM_infile = fopen(SIM_GARAGE_INFILE, "r");
 	SIM_outfile = fopen(SIM_GARAGE_OUTFILE, "a");
-	SIM_readNewState();
-#endif
 
 	fprintf(SIM_outfile, "time\t");
 	for (int i=0; i<SIM_SIZE_OF_MAP; i++) {
@@ -76,6 +98,12 @@ void SIM_initialize(Garage_io_struct* io) {
 	}
 	fprintf(SIM_outfile, "\n");
 	fclose(SIM_outfile);
+
+	SIM_writeCurrentState();
+
+	SIM_infile = fopen(SIM_GARAGE_INFILE, "r");
+	SIM_readNewState();
+
 }
 
 void SIM_advanceTime() {
@@ -117,11 +145,10 @@ void SIM_writeCurrentState() {
 
 	if (SIM_compareState(SIM_SIZE_OF_MAP, previousState, SIM_currentValues)
 			!= 0) {
-
+		int i;
 		SIM_outfile = fopen(SIM_GARAGE_OUTFILE, "a");
 		Log("Writing new values");
 
-		int i;
 		fprintf(SIM_outfile, "%lu\t", (long unsigned int)SIM_time);
 		for (i = 0; i < SIM_SIZE_OF_MAP; i++) {
 			fprintf(SIM_outfile, "%d\t", SIM_currentValues[i].value);
@@ -145,37 +172,44 @@ int SIM_compareState(int nrValues, int* v1, const SIM_map* map) {
 void SIM_readNewState() {
 	int i;
 	static int eof = 0;
-	static int nextEvent = 0;
-	static int nextValues[SIM_SIZE_OF_MAP] = { 0 };
 
-	while ((SIM_time >= nextEvent) && (eof >= 0)) {
+	while ((SIM_infile != NULL) && (SIM_time >= SIM_nextEvent) && (eof >= 0)) {
 		Log("Getting new values");
 		for (i = 0; i < SIM_SIZE_OF_MAP; i++) {
-			SIM_currentValues[i].value = nextValues[i];
+			SIM_currentValues[i].value = SIM_nextValues[i];
 		}
-		eof = SIM_readNewLine(&nextEvent, nextValues, SIM_SIZE_OF_MAP);
+		eof = SIM_readNewLine(&SIM_nextEvent, SIM_nextValues, SIM_NR_INPUTS);
 	}
 }
 
-int SIM_readNewLine(int* time, int* nextValues, int nrValues) {
+int SIM_readNewLine(uint32_t* time, uint8_t* nextValues, int nrValues) {
 	char* line = NULL;
 	size_t lineLength;
 	int r;
 	char* value;
 	int idx = 0;
+	int v;
 
 	r = getline(&line, &lineLength, SIM_infile);
+	while (r >=0 && line[0] == '#') {
+		r = getline(&line, &lineLength, SIM_infile);
+
+	}
 	if (r >= 0) {
 		value = strtok(line, ",\t\n");
 		if (value != NULL) {
-			*time = atoi(value);
+			v = atoi(value);
+			*time = (uint32_t)v;
 			value = strtok(NULL, ",\t\n");
 		}
 		while (idx < nrValues && value != NULL) {
-			nextValues[idx] = atoi(value);
+			v = atoi(value);
+			nextValues[idx] = (uint8_t)v;
+
 			idx++;
 			value = strtok(NULL, ",\t\n");
 		}
+
 	}
 	free(line);
 

@@ -5,7 +5,9 @@
  *      Author: wilbert
  */
 
+#ifdef SIMULATOR
 #include <unistd.h>
+#endif
 
 #ifndef SIMULATOR
 #include <avr/io.h>
