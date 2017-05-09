@@ -17,7 +17,7 @@
 
 #include "controller.h"
 
-#define AUTO_CLOSE_DOOR_TIMEOUT (uint32_t)(10*60*1000L)
+#define AUTO_CLOSE_DOOR_TIMEOUT TIMER_MINUTES(10)
 
 typedef enum {
 	IN_BETWEEN, OPENED, CLOSED, FREE, BLOCKED

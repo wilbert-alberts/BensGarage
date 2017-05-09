@@ -10,6 +10,7 @@
 #include "log.h"
 #include "lamp.h"
 #include "trafficlight.h"
+#include "timer.h"
 
 typedef struct {
 	Lamp red;
@@ -63,7 +64,7 @@ void TL_yellowFlash(TrafficLight tl) {
 
 	Lamp_off(obj->red);
 	Lamp_off(obj->green);
-	Lamp_flash(obj->yellow, 1000);
+	Lamp_flash(obj->yellow, TIMER_SECONDS(1));
 
 	Log_exit(__func__, "");
 }

@@ -21,16 +21,16 @@
 #include "simulator.h"
 
 static void initIO(Garage_io_struct* io);
+#ifndef SIMULATOR
 static void installTimer();
-
+#endif
 
 int main(int argc, char* argv[]) {
 	Garage_io_struct io;
-	Garage garage;
 
 	initIO(&io);
 
-	garage = Garage_construct(&io);
+	Garage_construct(&io);
 
 #ifndef SIMULATOR
 
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 static void installTimer()
 {
 
-	OCR1A = 125; // prescaler 64, clockfreq 8 Mhz, compare 125 implies delay 1ms.
+	OCR1A = 1250; // prescaler 64, clockfreq 8 Mhz, compare 1250 implies delay 10ms.
 	TIMSK1 |= _BV(OCIE1A); // enable interrupt on compare match
 	TCCR1B |= _BV(WGM12); // set clear counter on timer compare
 

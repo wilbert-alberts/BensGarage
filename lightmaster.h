@@ -9,10 +9,11 @@
 #define LIGHTMASTER_H_
 
 #include "hsi.h"
+#include "timer.h"
 
 typedef void* LightMaster;
 
-#define LM_AMBIENT_OFF_TIMER (uint32_t)(5*60*1000L) //  5 minutes
+#define LM_AMBIENT_OFF_TIMER (TIMER_MINUTES(5)) //  5 minutes
 
 typedef enum
 {

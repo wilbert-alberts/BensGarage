@@ -12,6 +12,12 @@
 
 #include "callback.h"
 
+
+#define TIMER_PERIOD      (10)
+#define TIMER_MINUTES(m)  ((m)*60*1000/TIMER_PERIOD)
+#define TIMER_SECONDS(s)  ((s)*1000/TIMER_PERIOD)
+#define TIMER_MS(ms)      ((uint32_t)(((double)(ms))/(double)(TIMER)))
+
 typedef void* Timer;
 
 Timer Timer_construct();

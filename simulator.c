@@ -175,7 +175,7 @@ void SIM_readNewState() {
 
 	while ((SIM_infile != NULL) && (SIM_time >= SIM_nextEvent) && (eof >= 0)) {
 		Log("Getting new values");
-		for (i = 0; i < SIM_SIZE_OF_MAP; i++) {
+		for (i = 0; i < SIM_NR_INPUTS; i++) {
 			SIM_currentValues[i].value = SIM_nextValues[i];
 		}
 		eof = SIM_readNewLine(&SIM_nextEvent, SIM_nextValues, SIM_NR_INPUTS);
