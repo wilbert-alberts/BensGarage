@@ -32,6 +32,6 @@ typedef struct
 
 } Garage_io_struct;
 
-Garage* Garage_construct(Garage_io_struct* io);
+extern Garage* Garage_construct(Garage_io_struct* io);
 
 #endif /* GARAGE_H_ */

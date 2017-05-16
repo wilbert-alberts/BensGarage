@@ -77,7 +77,7 @@ Door Door_construct(const CB_callbackClient* openedCB,
 	return (Door) result;
 }
 
-static void Door_sensorHigh(void* obj, void* context) {
+static void Door_sensorLow(void* obj, void* context) {
 	Log_entry(__func__, "");
 
 	Door_struct* door = (Door_struct*) obj;
@@ -94,7 +94,7 @@ static void Door_sensorHigh(void* obj, void* context) {
 	Log_exit(__func__, "");
 }
 
-static void Door_sensorLow(void* obj, void* context) {
+static void Door_sensorHigh(void* obj, void* context) {
 	Log_entry(__func__, "");
 
 	Door_struct* door = (Door_struct*) obj;
