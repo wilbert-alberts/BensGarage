@@ -9,6 +9,11 @@ static void installTimer();
 
 
 void setup() {
+  // Note actual baud rate is 4800 (16 times slower)
+  //   Internal clock prescaler is set to 8 (factor 8)
+  //   Regular arduino runs 16 Mhz but this on 8. (another factor 2)
+  Serial.begin(76800);
+ 
   // put your setup code here, to run once:
   Garage_io_struct io;
 
@@ -20,19 +25,21 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //Debouncer_sampleAllDebouncers();
-  //Timer_tickAllTimers();
   delay(10);
 }
 
 static void installTimer()
 {
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 = 0;
 
-  OCR1A = 1250; // prescaler 8, clockfreq 1 Mhz, compare 1250 implies delay 10ms.
+  OCR1A = 10000; // prescaler 1, clockfreq 1 Mhz, compare 10000 implies delay 10ms.
   TIMSK1 |= _BV(OCIE1A); // enable interrupt on compare match
-  TCCR1B |= _BV(WGM12); // set clear counter on timer compare
-
-  TCCR1B |= _BV(CS11); // Start timer (by setting prescaler)
+  TCCR1B |= (_BV(WGM12)); // set clear counter on timer compare
+  TCCR1A &= 0x00;
+  
+  TCCR1B |= _BV(CS10); // Start timer (by setting prescaler to 1)
 }
 
 ISR(TIMER1_COMPA_vect)
