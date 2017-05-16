@@ -73,41 +73,45 @@ ISR(TIMER1_COMPA_vect)
 
 static void initIO(Garage_io_struct* io) {
 #ifndef SIMULATOR
-	io->ambientLight.port = &PORTB;
-	io->ambientLight.pin = 1;
+	  io->ambientLight.port = &PORTC;
+	  io->ambientLight.pin = 3;
 
-	io->leftOpenedSensor.port = &PORTB;
-	io->leftOpenedSensor.pin = 2;
+	  io->leftOpenedSensor.port = &PORTD;
+	  io->leftOpenedSensor.pin = 3;
 
-	io->leftClosedSensor.port = &PORTB;
-	io->leftClosedSensor.pin = 3;
+	  io->leftClosedSensor.port = &PORTD;
+	  io->leftClosedSensor.pin = 2;
 
-	io->leftGateSensor.port = &PORTB;
-	io->leftGateSensor.pin = 4;
+	  io->leftGateSensor.port = &PORTD;
+	  io->leftGateSensor.pin = 4;
 
-	io->leftRemote.port = &PORTB;
-	io->leftRemote.pin = 5;
+	  io->leftRemote.port = &PORTC;
+	  io->leftRemote.pin = 4;
 
-	io->rightOpenedSensor.port = &PORTB;
-	io->rightOpenedSensor.pin = 6;
+	  io->rightOpenedSensor.port = &PORTD;
+	  io->rightOpenedSensor.pin = 6;
 
-	io->rightClosedSensor.port = &PORTB;
-	io->rightClosedSensor.pin = 7;
+	  io->rightClosedSensor.port = &PORTD;
+	  io->rightClosedSensor.pin = 5;
 
-	io->rightGateSensor.port = &PORTB;
-	io->rightGateSensor.pin = 8;
+	  io->rightGateSensor.port = &PORTD;
+	  io->rightGateSensor.pin = 7;
 
-	io->rightRemote.port = &PORTB;
-	io->rightRemote.pin = 9;
+	  io->rightRemote.port = &PORTC;
+	  io->rightRemote.pin = 5;
 
-	io->trafficRed.port = &PORTB;
-	io->trafficRed.pin = 10;
+	  io->trafficRed.port = &PORTC;
+	  io->trafficRed.pin = 0;
 
-	io->trafficYellow.port = &PORTB;
-	io->trafficYellow.pin = 11;
+	  io->trafficYellow.port = &PORTC;
+	  io->trafficYellow.pin = 1;
 
-	io->trafficGreen.port = &PORTB;
-	io->trafficGreen.pin = 12;
+	  io->trafficGreen.port = &PORTC;
+	  io->trafficGreen.pin = 2;
+
+	  // All outputs are connected to port C
+	  DDRC = 0b00111111;
+
 #else
 	io->ambientLight.port = NULL;
 	io->ambientLight.pin = 0;
@@ -117,6 +121,7 @@ static void initIO(Garage_io_struct* io) {
 
 	io->leftClosedSensor.port = NULL;
 	io->leftClosedSensor.pin = 2;
+
 
 	io->leftGateSensor.port = NULL;
 	io->leftGateSensor.pin = 3;
