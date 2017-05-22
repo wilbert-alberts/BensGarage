@@ -12,15 +12,18 @@ void setup() {
   // Note actual baud rate is 4800 (16 times slower)
   //   Internal clock prescaler is set to 8 (factor 8)
   //   Regular arduino runs 16 Mhz but this on 8. (another factor 2)
-  Serial.begin(76800);
+  Serial.begin(115200);
+
+  Logln(PSTR("Lichtsluis starting up"));
  
-  // put your setup code here, to run once:
   Garage_io_struct io;
 
   initIO(&io);
 
   Garage_construct(&io);
   installTimer();
+
+  Logln(PSTR("Lichtsluis started"));
 }
 
 void loop() {
@@ -30,47 +33,50 @@ void loop() {
 
 static void installTimer()
 {
+  Logln(PSTR("Installing timer"));
   TCCR1A = 0;
   TCCR1B = 0;
   TCNT1 = 0;
 
-  OCR1A = 10000; // prescaler 1, clockfreq 1 Mhz, compare 10000 implies delay 10ms.
+  OCR1A = 6250; // prescaler 256, clockfreq 16 Mhz, compare 625 implies delay 10ms.
   TIMSK1 |= _BV(OCIE1A); // enable interrupt on compare match
   TCCR1B |= (_BV(WGM12)); // set clear counter on timer compare
   TCCR1A &= 0x00;
   
-  TCCR1B |= _BV(CS10); // Start timer (by setting prescaler to 1)
+  TCCR1B |= _BV(CS12); // Start timer (by setting prescaler to 256)
+  Logln(PSTR("Timer started"));
 }
 
 ISR(TIMER1_COMPA_vect)
 {
   Debouncer_sampleAllDebouncers();
-  Timer_tickAllTimers();
+//  Timer_tickAllTimers();
 }
 
 static void initIO(Garage_io_struct* io) {
+  Logln(PSTR("Configure IO"));
   io->ambientLight.port = &PORTC;
   io->ambientLight.pin = 3;
 
-  io->leftOpenedSensor.port = &PORTD;
+  io->leftOpenedSensor.port = &PIND;
   io->leftOpenedSensor.pin = 3;
 
-  io->leftClosedSensor.port = &PORTD;
+  io->leftClosedSensor.port = &PIND;
   io->leftClosedSensor.pin = 2;
 
-  io->leftGateSensor.port = &PORTD;
+  io->leftGateSensor.port = &PIND;
   io->leftGateSensor.pin = 4;
 
   io->leftRemote.port = &PORTC;
   io->leftRemote.pin = 4;
 
-  io->rightOpenedSensor.port = &PORTD;
+  io->rightOpenedSensor.port = &PIND;
   io->rightOpenedSensor.pin = 6;
 
-  io->rightClosedSensor.port = &PORTD;
+  io->rightClosedSensor.port = &PIND;
   io->rightClosedSensor.pin = 5;
 
-  io->rightGateSensor.port = &PORTD;
+  io->rightGateSensor.port = &PIND;
   io->rightGateSensor.pin = 7;
 
   io->rightRemote.port = &PORTC;
@@ -87,4 +93,5 @@ static void initIO(Garage_io_struct* io) {
 
   // All outputs are connected to port C
   DDRC = 0b00111111;
+  Logln(PSTR("IO Configured"));
 }

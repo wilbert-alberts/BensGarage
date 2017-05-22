@@ -21,6 +21,6 @@ typedef struct
 
 uint8_t HSI_readPin(HSI_dio_struct);
 void HSI_writePin(HSI_dio_struct, uint8_t value);
-
+void HSI_toString(HSI_dio_struct* io, char buffer[6]);
 
 #endif /* HSI_H_ */

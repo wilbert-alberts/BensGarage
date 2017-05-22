@@ -21,6 +21,7 @@ typedef enum {
 } Door_state_enum;
 
 typedef struct {
+  char            id;
 	Door_state_enum state;
 
 	CB_callbackClient openedCB;
@@ -35,14 +36,15 @@ typedef struct {
 static void Door_sensorLow(void* obj, void* context);
 static void Door_sensorHigh(void* obj, void* context);
 
-Door Door_construct(const CB_callbackClient* openedCB,
+Door Door_construct(char id, const CB_callbackClient* openedCB,
 		const CB_callbackClient* inbetweenCB, const CB_callbackClient* closedCB,
 		HSI_dio_struct openedSensor, HSI_dio_struct closedSensor) {
 
-	Log_entry(__func__, "");
+	Log_entry(PSTR("Door_construct"));
 
 	Door_struct* result = (Door_struct*) calloc(1, sizeof(Door_struct));
 
+  result->id = id;
 	result->openedCB = *openedCB;
 	result->inbetweenCB = *inbetweenCB;
 	result->closedCB = *closedCB;
@@ -73,39 +75,48 @@ Door Door_construct(const CB_callbackClient* openedCB,
 	result->openedSensor = Debouncer_construct(&cbOpenedHigh, &cbOpenedLow,
 			openedSensor);
 
-	Log_exit(__func__, "");
+	Log_exit(PSTR("Door_construct"));
 	return (Door) result;
 }
 
 static void Door_sensorLow(void* obj, void* context) {
-	Log_entry(__func__, "");
+	Log_entry(PSTR("Door_sensorLow"));
 
 	Door_struct* door = (Door_struct*) obj;
 
 	if (context == CONTEXT_OPENED_SENSOR) {
+    Log("Door opened ");
+    LogChar(door->id);
+    Log("\n");
 		CB_notify(&door->openedCB);
 	} else if (context == CONTEXT_CLOSED_SENSOR) {
+    Log("Door closed ");
+    LogChar(door->id);
+    Log("\n");
 		CB_notify(&door->closedCB);
 	} else {
-		Log_error(__func__,
-				"Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR");
+		Log_error(PSTR("Door_sensorLow"),
+				PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
 	}
 
-	Log_exit(__func__, "");
+	Log_exit(PSTR("Door_sensorLow"));
 }
 
 static void Door_sensorHigh(void* obj, void* context) {
-	Log_entry(__func__, "");
+	Log_entry(PSTR("Door_sensorHigh"));
 
 	Door_struct* door = (Door_struct*) obj;
 
 	if ((context == CONTEXT_CLOSED_SENSOR)
 			|| (context == CONTEXT_OPENED_SENSOR)) {
+    Log("Door moving (transient) ");
+    LogChar(door->id);
+    Log("\n");
 		CB_notify(&door->inbetweenCB);
 	} else {
-		Log_error(__func__,
-				"Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR");
+		Log_error(PSTR("Door_sensorHigh"),
+				PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
 	}
 
-	Log_exit(__func__, "");
+	Log_exit(PSTR("Door_sensorHigh"));
 }

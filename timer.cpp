@@ -66,7 +66,11 @@ void Timer_tick(Timer timer) {
 void Timer_tickAllTimers()
 {
 	int i;
+  Log(".");
+  
 	for (i=0; i<timer_nrTimers; i++) {
 		Timer_tick(&timer_Timers[i]);
 	}
+
+ 
 }

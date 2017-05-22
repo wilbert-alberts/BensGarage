@@ -13,7 +13,7 @@
 
 typedef void* Controller;
 
-Controller Controller_construct(HSI_dio_struct openedSensor, HSI_dio_struct closedSensor, HSI_dio_struct gateSensor, HSI_dio_struct remote,
+Controller Controller_construct(char id, HSI_dio_struct openedSensor, HSI_dio_struct closedSensor, HSI_dio_struct gateSensor, HSI_dio_struct remote,
 		CB_callbackClient cbRed, CB_callbackClient cbYellow, CB_callbackClient cbYellowFlash, CB_callbackClient cbGreen, CB_callbackClient cbOff);
 
 #endif /* CONTROLLER_H_ */

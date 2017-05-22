@@ -13,7 +13,7 @@
 
 typedef void* Door;
 
-Door Door_construct(const CB_callbackClient* openedCB,
+Door Door_construct(char id, const CB_callbackClient* openedCB,
 		const CB_callbackClient* inbetweenCB, const CB_callbackClient* closedCB,
 		HSI_dio_struct openedSensor, HSI_dio_struct closedSensor);
 

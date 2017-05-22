@@ -60,9 +60,15 @@ void Debouncer_sample(Debouncer debouncer) {
 		obj->remaining--;
 		if (obj->remaining == 0) {
 			if (v == 0) {
+        Log(PSTR("Debouncer "));
+        LogPort(&obj->io);
+        Logln(PSTR(" gone low"));
 				CB_notify(&obj->whenLowCB);
 			}
 			if (v == 1) {
+        Log(PSTR("Debouncer "));
+        LogPort(&obj->io);
+        Logln(PSTR(" gone high"));
 				CB_notify(&obj->whenHighCB);
 			}
 			obj->value = v;
