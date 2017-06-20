@@ -17,8 +17,6 @@
 
 #include "controller.h"
 
-#define AUTO_CLOSE_DOOR_TIMEOUT TIMER_MINUTES(10)
-
 typedef enum {
 	IN_BETWEEN, OPENED, CLOSED, FREE, BLOCKED
 } Controller_event_enum;
@@ -52,14 +50,18 @@ static void Controller_autoClose(void* obj, void* context);
 
 static void Controller_State_Closed_Free(void* controller,
 		Controller_event_enum event);
-static void Controller_State_In_Between_Free(void* controller,
-		Controller_event_enum event);
+static void Controller_State_Opening_Free(void* controller,
+    Controller_event_enum event);
+static void Controller_State_Closing_Free(void* controller,
+    Controller_event_enum event);
 static void Controller_State_Opened_Free(void* controller,
 		Controller_event_enum event);
 static void Controller_State_Closed_Blocked(void* controller,
 		Controller_event_enum event);
-static void Controller_State_In_Between_Blocked(void* controller,
-		Controller_event_enum event);
+static void Controller_State_Opening_Blocked(void* controller,
+    Controller_event_enum event);
+static void Controller_State_Closing_Blocked(void* controller,
+    Controller_event_enum event);
 static void Controller_State_Opened_Blocked(void* controller,
 		Controller_event_enum event);
 
@@ -89,6 +91,7 @@ Controller Controller_construct(char id, HSI_dio_struct openedSensor,
 	result->cbGreen = cbGreen;
 	result->cbOff = cbOff;
 
+  // Set the initial state: 
 	result->handler = Controller_State_Closed_Free;
 
 	result->autoCloseTimer = Timer_construct();
@@ -100,6 +103,10 @@ Controller Controller_construct(char id, HSI_dio_struct openedSensor,
 	return result;
 }
 
+/* Event dispatch functions 
+ * 
+ * They dispatch the event to the correct controller.
+ */
 static void Controller_doorOpened(void* controller, void* context) {
 	Controller_struct* obj = (Controller_struct*) controller;
   Log_entry(PSTR("Controller_doorOpened"));
@@ -107,7 +114,7 @@ static void Controller_doorOpened(void* controller, void* context) {
 
 	obj->handler(obj, OPENED);
 
-	Log_exit(PSTR("Controller_construct"));
+	Log_exit(PSTR("Controller_doorOpened"));
 }
 
 static void Controller_doorInBetween(void* controller, void* context) {
@@ -150,6 +157,8 @@ static void Controller_gateBlocked(void* controller, void* context) {
 	Log_exit(PSTR("Controller_gateBlocked"));
 }
 
+/* State handlers */
+
 static void Controller_State_Closed_Free(void* controller,
 		Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
@@ -158,12 +167,12 @@ static void Controller_State_Closed_Free(void* controller,
 
 	switch (event) {
 	case IN_BETWEEN:
-    Logln(PSTR("State: in between"));
-		CB_notify(&obj->cbYellow);
-		obj->handler = Controller_State_In_Between_Free;
+    Logln(PSTR("Event: in between"));
+		CB_notify(&obj->cbGreen);    
+		obj->handler = Controller_State_Opening_Free;
 		break;
 	case BLOCKED:
-    Logln(PSTR("State: blocked"));
+    Logln(PSTR("Event: blocked"));
 		CB_notify(&obj->cbYellowFlash);
 		obj->handler = Controller_State_Closed_Blocked;
 		break;
@@ -178,7 +187,7 @@ static void Controller_State_Closed_Free(void* controller,
 	Log_exit(PSTR("Controller_State_Closed_Free"));
 }
 
-static void Controller_State_In_Between_Free(void* controller,
+static void Controller_State_Opening_Free(void* controller,
 		Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
   Log_entry(PSTR("Controller_State_In_Between_Free"));
@@ -186,21 +195,20 @@ static void Controller_State_In_Between_Free(void* controller,
 
 	switch (event) {
 	case OPENED:
-    Logln(PSTR("State: opened"));
-		CB_notify(&obj->cbGreen);
+    Logln(PSTR("Event: opened"));
 		Timer_setTimer(obj->autoCloseTimer, &obj->cbAutoClose,
 				AUTO_CLOSE_DOOR_TIMEOUT);
 		obj->handler = Controller_State_Opened_Free;
 		break;
 	case CLOSED:
-    Logln(PSTR("State: closed"));
+    Logln(PSTR("Event: closed"));
 		CB_notify(&obj->cbOff);
 		obj->handler = Controller_State_Closed_Free;
 		break;
 	case BLOCKED:
-    Logln(PSTR("State: blocked"));
-		CB_notify(&obj->cbYellowFlash);
-		obj->handler = Controller_State_In_Between_Blocked;
+    Logln(PSTR("Event: blocked"));
+		CB_notify(&obj->cbYellow);
+		obj->handler = Controller_State_Opening_Blocked;
 		break;
 	case FREE:
 	case IN_BETWEEN:
@@ -212,6 +220,39 @@ static void Controller_State_In_Between_Free(void* controller,
 	Log_exit(PSTR("Controller_State_In_Between_Free"));
 }
 
+static void Controller_State_Opening_Blocked(void* controller,
+    Controller_event_enum event) {
+  Controller_struct* obj = (Controller_struct*) controller;
+  Log_entry(PSTR("Controller_State_In_Between_Free"));
+  Log(PSTR(" id: ")); Logln(obj->id);
+
+  switch (event) {
+  case OPENED:
+    Logln(PSTR("Event: opened"));
+    obj->handler = Controller_State_Opened_Blocked;
+    break;
+  case CLOSED:
+    Logln(PSTR("Event: closed"));
+    CB_notify(&obj->cbYellowFlash);
+    obj->handler = Controller_State_Closed_Blocked;
+    break;
+  case FREE:
+    Logln(PSTR("Event: free"));
+    CB_notify(&obj->cbRed);
+    obj->handler = Controller_State_Opening_Free;
+    break;
+  case BLOCKED:
+  case IN_BETWEEN:
+  default:
+    Log_error(PSTR("Controller_State_In_Between_Free"), PSTR("Illegal event"));
+    break;
+  }
+
+  Log_exit(PSTR("Controller_State_In_Between_Free"));
+}
+
+
+
 static void Controller_State_Opened_Free(void* controller,
 		Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
@@ -220,13 +261,15 @@ static void Controller_State_Opened_Free(void* controller,
 
 	switch (event) {
 	case IN_BETWEEN:
-    Logln(PSTR("State: in between"));
+    Logln(PSTR("Event: in between"));
 		CB_notify(&obj->cbYellow);
-		obj->handler = Controller_State_In_Between_Free;
+    Timer_cancelTimer(obj->autoCloseTimer);
+		obj->handler = Controller_State_Closing_Free;
 		break;
 	case BLOCKED:
-    Logln(PSTR("State: blocked"));
-		CB_notify(&obj->cbYellowFlash);
+    Logln(PSTR("Event: blocked"));
+		CB_notify(&obj->cbYellow);
+    Timer_cancelTimer(obj->autoCloseTimer);
 		obj->handler = Controller_State_Opened_Blocked;
 		break;
 	case FREE:
@@ -248,12 +291,11 @@ static void Controller_State_Closed_Blocked(void* controller,
 
 	switch (event) {
 	case IN_BETWEEN:
-    Logln(PSTR("State: in between"));
-		CB_notify(&obj->cbYellowFlash);
-		obj->handler = Controller_State_In_Between_Blocked;
+    Logln(PSTR("Event: in between"));
+		obj->handler = Controller_State_Opening_Blocked;
 		break;
 	case FREE:
-    Logln(PSTR("State: free"));
+    Logln(PSTR("Event: free"));
 		CB_notify(&obj->cbOff);
 		obj->handler = Controller_State_Closed_Free;
 		break;
@@ -268,7 +310,7 @@ static void Controller_State_Closed_Blocked(void* controller,
 	Log_exit(PSTR("Controller_State_Closed_Blocked"));
 }
 
-static void Controller_State_In_Between_Blocked(void* controller,
+static void Controller_State_Closing_Blocked(void* controller,
 		Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
   Log_entry(PSTR("Controller_State_In_Between_Blocked"));
@@ -276,19 +318,18 @@ static void Controller_State_In_Between_Blocked(void* controller,
 
 	switch (event) {
 	case OPENED:
-    Logln(PSTR("State: opened"));
-		CB_notify(&obj->cbYellowFlash);
+    Logln(PSTR("Event: opened"));
 		obj->handler = Controller_State_Opened_Blocked;
 		break;
 	case CLOSED:
-    Logln(PSTR("State: closed"));
+    Logln(PSTR("Event: closed"));
 		CB_notify(&obj->cbYellowFlash);
 		obj->handler = Controller_State_Closed_Blocked;
 		break;
 	case FREE:
-    Logln(PSTR("State: free"));
-		CB_notify(&obj->cbYellow);
-		obj->handler = Controller_State_In_Between_Free;
+    Logln(PSTR("Event: free"));
+		CB_notify(&obj->cbOff);
+		obj->handler = Controller_State_Closing_Free;
 		break;
 	case IN_BETWEEN:
 	case BLOCKED:
@@ -300,6 +341,38 @@ static void Controller_State_In_Between_Blocked(void* controller,
 	Log_exit(PSTR("Controller_State_In_Between_Blocked"));
 }
 
+static void Controller_State_Closing_Free(void* controller,
+    Controller_event_enum event) {
+  Controller_struct* obj = (Controller_struct*) controller;
+  Log_entry(PSTR("Controller_State_In_Between_Free"));
+  Log(PSTR(" id: ")); Logln(obj->id);
+
+  switch (event) {
+  case OPENED:
+    Logln(PSTR("Event: opened"));
+    obj->handler = Controller_State_Opened_Free;
+    break;
+  case CLOSED:
+    Logln(PSTR("Event: closed"));
+    CB_notify(&obj->cbOff);
+    obj->handler = Controller_State_Closed_Free;
+    break;
+  case BLOCKED:
+    Logln(PSTR("Event: free"));
+    CB_notify(&obj->cbYellowFlash);
+    obj->handler = Controller_State_Closing_Blocked;
+    break;
+  case FREE:
+  case IN_BETWEEN:
+  default:
+    Log_error(PSTR("Controller_State_In_Between_Free"), PSTR("Illegal event"));
+    break;
+  }
+
+  Log_exit(PSTR("Controller_State_In_Between_Free"));
+}
+
+
 static void Controller_State_Opened_Blocked(void* controller,
 		Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
@@ -308,9 +381,9 @@ static void Controller_State_Opened_Blocked(void* controller,
 
 	switch (event) {
 	case IN_BETWEEN:
-    Logln(PSTR("State: in between"));
+    Logln(PSTR("Event: in between"));
 		CB_notify(&obj->cbYellowFlash);
-		obj->handler = Controller_State_In_Between_Blocked;
+		obj->handler = Controller_State_Closing_Blocked;
 		break;
 	case FREE:
     Logln(PSTR("State: free"));

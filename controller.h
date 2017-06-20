@@ -11,6 +11,8 @@
 #include "callback.h"
 #include "hsi.h"
 
+#define AUTO_CLOSE_DOOR_TIMEOUT TIMER_MINUTES(4)
+
 typedef void* Controller;
 
 Controller Controller_construct(char id, HSI_dio_struct openedSensor, HSI_dio_struct closedSensor, HSI_dio_struct gateSensor, HSI_dio_struct remote,
