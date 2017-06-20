@@ -48,9 +48,9 @@ Lamp Lamp_construct(HSI_dio_struct dio) {
 	result->flashOnCB.obj = result;
 	result->flashOnCB.context = NULL;
 
-	result->flashOffCB.callback = Lamp_oneShotCB;
-	result->flashOffCB.obj = result;
-	result->flashOffCB.context = NULL;
+	result->oneShotCB.callback = Lamp_oneShotCB;
+	result->oneShotCB.obj = result;
+	result->oneShotCB.context = NULL;
 
 	Log_exit(PSTR("Lamp_construct"));
 	return result;

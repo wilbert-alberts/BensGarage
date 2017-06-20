@@ -40,8 +40,7 @@ Garage* Garage_construct(Garage_io_struct* io) {
 	Garage_struct* result = (Garage_struct*) calloc(1, sizeof(Garage_struct));
 	CB_callbackClient cbRed = { result, GARAGE_LEFT, Garage_Red };
 	CB_callbackClient cbYellow = { result, GARAGE_LEFT, Garage_Yellow };
-	CB_callbackClient cbYellowFlash =
-			{ result, GARAGE_LEFT, Garage_YellowFlash };
+	CB_callbackClient cbYellowFlash =	{ result, GARAGE_LEFT, Garage_YellowFlash };
 	CB_callbackClient cbGreen = { result, GARAGE_LEFT, Garage_Green };
 	CB_callbackClient cbOff = { result, GARAGE_LEFT, Garage_Off };
 

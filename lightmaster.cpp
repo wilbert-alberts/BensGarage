@@ -145,7 +145,7 @@ void LM_setLight(LightMaster lm, LM_side_enum side, LM_trafficLightState state) 
     Logln(PSTR("Light set to Yellow"));
 		break;
 	case LM_YELLOW_FLASH:
-		TL_yellow(obj->trafficLight);
+		TL_yellowFlash(obj->trafficLight);
 		LM_ambientOn(obj);
     Logln(PSTR("Light set to Yellow (flash)"));
 		break;

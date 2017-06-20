@@ -13,7 +13,7 @@
 #include "debouncer.h"
 #include "callback.h"
 
-#define DEBOUNCER_STABLEDURATION (10)
+#define DEBOUNCER_STABLEDURATION (3)
 #define DEBOUNCER_NRDEBOUNCERS (6)
 
 typedef struct {

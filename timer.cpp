@@ -40,14 +40,19 @@ Timer Timer_construct() {
 }
 
 void Timer_setTimer(Timer timer, const CB_callbackClient* cb, uint32_t delta) {
+  Log_entry(PSTR("Timer_setTimer"));
+
 	Timer_struct* obj = (Timer_struct*)timer;
 	obj->remaining = delta;
 	CB_register(&obj->callback, cb->callback, cb->obj, cb->context);
+  Log_exit(PSTR("Timer_setTimer"));
 }
 
 void Timer_cancelTimer(Timer timer) {
+  Log_entry(PSTR("Timer_cancelTimer"));
 	Timer_struct* obj = (Timer_struct*)timer;
 	CB_unregister(&obj->callback);
+  Log_exit(PSTR("Timer_cancelTimer"));
 }
 
 void Timer_tick(Timer timer) {
@@ -55,6 +60,7 @@ void Timer_tick(Timer timer) {
 	if (CB_isRegistered(&obj->callback)) {
 		obj->remaining--;
 		if (obj->remaining == 0) {
+//      Logln(PSTR("Timer_tick - ALARM"));
 			CB_callbackClient cb = obj->callback;
 			CB_unregister(&obj->callback);
 
@@ -66,8 +72,8 @@ void Timer_tick(Timer timer) {
 void Timer_tickAllTimers()
 {
 	int i;
-  Log(".");
-  
+
+//  Log_entry(PSTR("Timer_tickAllTimers"));
 	for (i=0; i<timer_nrTimers; i++) {
 		Timer_tick(&timer_Timers[i]);
 	}

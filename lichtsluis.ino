@@ -52,7 +52,7 @@ static void installTimer()
 ISR(TIMER1_COMPA_vect)
 {
   Debouncer_sampleAllDebouncers();
-//  Timer_tickAllTimers();
+  Timer_tickAllTimers();
 }
 
 static void initIO(Garage_io_struct* io) {

@@ -82,12 +82,13 @@ Controller Controller_construct(char id, HSI_dio_struct openedSensor,
 	result->door = Door_construct(id, &openedCB, &inbetweenCB, &closedCB,
 			openedSensor, closedSensor);
 
-	CB_callbackClient gateHighCB = { result, NULL, Controller_gateBlocked };
-	CB_callbackClient gateLowCB = { result, NULL, Controller_gateFree };
+	CB_callbackClient gateHighCB = { result, NULL, Controller_gateFree };
+	CB_callbackClient gateLowCB = { result, NULL, Controller_gateBlocked };
 	result->gate = Debouncer_construct(&gateHighCB, &gateLowCB, gateSensor);
 
 	result->cbRed = cbRed;
 	result->cbYellow = cbYellow;
+  result->cbYellowFlash = cbYellowFlash;
 	result->cbGreen = cbGreen;
 	result->cbOff = cbOff;
 
@@ -190,7 +191,7 @@ static void Controller_State_Closed_Free(void* controller,
 static void Controller_State_Opening_Free(void* controller,
 		Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
-  Log_entry(PSTR("Controller_State_In_Between_Free"));
+  Log_entry(PSTR("Controller_State_Opening_Free"));
   Log(PSTR(" id: ")); Logln(obj->id);
 
 	switch (event) {
@@ -213,17 +214,17 @@ static void Controller_State_Opening_Free(void* controller,
 	case FREE:
 	case IN_BETWEEN:
 	default:
-		Log_error(PSTR("Controller_State_In_Between_Free"), PSTR("Illegal event"));
+		Log_error(PSTR("Controller_State_Opening_Free"), PSTR("Illegal event"));
 		break;
 	}
 
-	Log_exit(PSTR("Controller_State_In_Between_Free"));
+	Log_exit(PSTR("Controller_State_Opening_Free"));
 }
 
 static void Controller_State_Opening_Blocked(void* controller,
     Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
-  Log_entry(PSTR("Controller_State_In_Between_Free"));
+  Log_entry(PSTR("Controller_State_Opening_Blocked"));
   Log(PSTR(" id: ")); Logln(obj->id);
 
   switch (event) {
@@ -244,11 +245,11 @@ static void Controller_State_Opening_Blocked(void* controller,
   case BLOCKED:
   case IN_BETWEEN:
   default:
-    Log_error(PSTR("Controller_State_In_Between_Free"), PSTR("Illegal event"));
+    Log_error(PSTR("Controller_State_Opening_Blocked"), PSTR("Illegal event"));
     break;
   }
 
-  Log_exit(PSTR("Controller_State_In_Between_Free"));
+  Log_exit(PSTR("Controller_State_Opening_Blocked"));
 }
 
 
@@ -262,7 +263,6 @@ static void Controller_State_Opened_Free(void* controller,
 	switch (event) {
 	case IN_BETWEEN:
     Logln(PSTR("Event: in between"));
-		CB_notify(&obj->cbYellow);
     Timer_cancelTimer(obj->autoCloseTimer);
 		obj->handler = Controller_State_Closing_Free;
 		break;
@@ -313,7 +313,7 @@ static void Controller_State_Closed_Blocked(void* controller,
 static void Controller_State_Closing_Blocked(void* controller,
 		Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
-  Log_entry(PSTR("Controller_State_In_Between_Blocked"));
+  Log_entry(PSTR("Controller_State_Closing_Blocked"));
   Log(PSTR(" id: ")); Logln(obj->id);
 
 	switch (event) {
@@ -334,17 +334,17 @@ static void Controller_State_Closing_Blocked(void* controller,
 	case IN_BETWEEN:
 	case BLOCKED:
 	default:
-		Log_error(PSTR("Controller_State_In_Between_Blocked"), PSTR("Illegal event"));
+		Log_error(PSTR("Controller_State_Closing_Blocked"), PSTR("Illegal event"));
 		break;
 	}
 
-	Log_exit(PSTR("Controller_State_In_Between_Blocked"));
+	Log_exit(PSTR("Controller_State_Closing_Blocked"));
 }
 
 static void Controller_State_Closing_Free(void* controller,
     Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
-  Log_entry(PSTR("Controller_State_In_Between_Free"));
+  Log_entry(PSTR("Controller_State_Closing_Free"));
   Log(PSTR(" id: ")); Logln(obj->id);
 
   switch (event) {
@@ -365,11 +365,11 @@ static void Controller_State_Closing_Free(void* controller,
   case FREE:
   case IN_BETWEEN:
   default:
-    Log_error(PSTR("Controller_State_In_Between_Free"), PSTR("Illegal event"));
+    Log_error(PSTR("Controller_State_Closing_Free"), PSTR("Illegal event"));
     break;
   }
 
-  Log_exit(PSTR("Controller_State_In_Between_Free"));
+  Log_exit(PSTR("Controller_State_Closing_Free"));
 }
 
 
