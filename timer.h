@@ -20,7 +20,7 @@
 
 typedef void* Timer;
 
-Timer Timer_construct();
+Timer Timer_construct(const char* id);
 void Timer_setTimer(Timer timer, const CB_callbackClient* cb, uint32_t delta);
 void Timer_cancelTimer(Timer timer);
 void Timer_tick(Timer timer);

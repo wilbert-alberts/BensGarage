@@ -44,7 +44,7 @@ Debouncer Debouncer_construct(const CB_callbackClient* whenHigh,
 
 		return (Debouncer) result;
 	} else {
-		Log_error(__func__, "Not enough debouncers");
+		Log_error_PP(PSTR("Debouncer_construct"), PSTR("Not enough debouncers"));
 		return NULL;
 	}
 }
