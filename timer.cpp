@@ -54,14 +54,14 @@ void Timer_cancelTimer(Timer timer) {
 
 void Timer_tick(Timer timer) {
 	Timer_struct* obj = (Timer_struct*)timer;
-  Log(PSTR("Ticking: "));
+  Log_P(PSTR("Ticking: "));
   Log(obj->id);
 	if (CB_isRegistered(&obj->callback)) {
 		obj->remaining--;
-  Log(PSTR(": "));
+  Log_P(PSTR(": "));
     LogInt((int)obj->remaining);
 		if (obj->remaining == 0) {
-      Log(PSTR(" - ALARM"));
+      Log_P(PSTR(" - ALARM"));
       Logln(".");
 			CB_callbackClient cb = obj->callback;
 			CB_unregister(&obj->callback);

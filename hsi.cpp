@@ -20,7 +20,7 @@ uint8_t HSI_readPin(HSI_dio_struct io)
 	result = *io.port & _BV(io.pin);
 
 /*
-  Logln(PSTR("ReadPin "));
+  Logln_P(PSTR("ReadPin "));
   LogPort(&io);
   Serial.print("\n");
   Serial.println(result);

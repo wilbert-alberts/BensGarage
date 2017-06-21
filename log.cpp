@@ -61,12 +61,12 @@ void LogPort(const HSI_dio_struct* p)
 
 void Log_entry_P(const char* f) {
   Log_P(f);
-  Logln(PSTR(" >()"));
+  Logln_P(PSTR(" >()"));
 }
 
 void Log_exit_P(const char* f) {
   Log_P(f);
-  Logln(PSTR(" <()"));
+  Logln_P(PSTR(" <()"));
 }
 
 void Log_error_PP(const char* f, const char* msg) {
