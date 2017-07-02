@@ -60,7 +60,7 @@ void Timer_tick(Timer timer) {
 	if (CB_isRegistered(&obj->callback)) {
 		obj->remaining--;
 		if (obj->remaining == 0) {
-//      Logln(PSTR("Timer_tick - ALARM"));
+      Logln(PSTR("Timer_tick - ALARM"));
 			CB_callbackClient cb = obj->callback;
 			CB_unregister(&obj->callback);
 

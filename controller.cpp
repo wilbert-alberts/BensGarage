@@ -29,7 +29,9 @@ typedef struct {
 	Debouncer gate;
 
 	Timer autoCloseTimer;
-	CB_callbackClient cbAutoClose;
+  Timer pulseCBTimer;
+  CB_callbackClient cbAutoClose;
+  CB_callbackClient cbAutoCloseCB;
 	HSI_dio_struct doorRemote;
 
 	CB_callbackClient cbRed;
@@ -47,6 +49,7 @@ static void Controller_doorClosed(void* obj, void* context);
 static void Controller_gateFree(void* obj, void* context);
 static void Controller_gateBlocked(void* obj, void* context);
 static void Controller_autoClose(void* obj, void* context);
+static void Controller_autoCloseCB(void* obj, void* context);
 
 static void Controller_State_Closed_Free(void* controller,
 		Controller_event_enum event);
@@ -96,8 +99,12 @@ Controller Controller_construct(char id, HSI_dio_struct openedSensor,
 	result->handler = Controller_State_Closed_Free;
 
 	result->autoCloseTimer = Timer_construct();
+  result->pulseCBTimer = Timer_construct();
 	CB_callbackClient cbAutoClose = { result, Controller_autoClose, NULL };
-	result->cbAutoClose = cbAutoClose;
+  CB_callbackClient cbAutoCloseCB = { result, Controller_autoCloseCB, NULL };
+  result->cbAutoClose = cbAutoClose;
+  result->cbAutoCloseCB = cbAutoCloseCB;
+  
 	result->doorRemote = remote;
 
 	Log_exit(PSTR("Controller_construct"));
@@ -197,8 +204,7 @@ static void Controller_State_Opening_Free(void* controller,
 	switch (event) {
 	case OPENED:
     Logln(PSTR("Event: opened"));
-		Timer_setTimer(obj->autoCloseTimer, &obj->cbAutoClose,
-				AUTO_CLOSE_DOOR_TIMEOUT);
+		Timer_setTimer(obj->autoCloseTimer, &obj->cbAutoClose, AUTO_CLOSE_DOOR_TIMEOUT);
 		obj->handler = Controller_State_Opened_Free;
 		break;
 	case CLOSED:
@@ -388,6 +394,7 @@ static void Controller_State_Opened_Blocked(void* controller,
 	case FREE:
     Logln(PSTR("State: free"));
 		CB_notify(&obj->cbRed);
+    Timer_setTimer(obj->autoCloseTimer, &obj->cbAutoClose, AUTO_CLOSE_DOOR_TIMEOUT);   
 		obj->handler = Controller_State_Opened_Free;
 		break;
 	case BLOCKED:
@@ -406,11 +413,22 @@ static void Controller_autoClose(void* controller, void* context) {
   Log_entry(PSTR("Controller_autoClose"));
   Log(PSTR(" id: ")); Logln(obj->id);
 
-
+  Logln(PSTR("Pulse high"));
 	HSI_writePin(obj->doorRemote, 1);
-	// TODO: Sleep?
-	HSI_writePin(obj->doorRemote, 0);
 
-	Log_exit(PSTR("Controller_autoClose"));
+  Timer_setTimer(obj->pulseCBTimer, &obj->cbAutoCloseCB, AUTO_CLOSE_DOOR_PULSE);
+  
+ Log_exit(PSTR("Controller_autoClose"));
+}
+
+static void Controller_autoCloseCB(void* controller, void* context) {
+  Controller_struct* obj = (Controller_struct*) controller;
+  Log_entry(PSTR("Controller_autoCloseCB"));
+
+  Logln(PSTR("Pulse low"));
+  HSI_writePin(obj->doorRemote, 0);
+  
+  Log_exit(PSTR("Controller_autoCloseCB"));
+
 }
 

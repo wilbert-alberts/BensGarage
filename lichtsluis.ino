@@ -40,7 +40,7 @@ static void installTimer()
 
   // Set timer ticks to 10ms 
 
-  OCR1A = 6250; // prescaler 256, clockfreq 16 Mhz, compare 625 implies delay 10ms.
+  OCR1A = 625; // prescaler 256, clockfreq 16 Mhz, compare 625 implies delay 10ms.
   TIMSK1 |= _BV(OCIE1A); // enable interrupt on compare match
   TCCR1B |= (_BV(WGM12)); // set clear counter on timer compare
   TCCR1A &= 0x00;

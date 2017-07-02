@@ -64,7 +64,7 @@ void TL_yellowFlash(TrafficLight tl) {
 
 	Lamp_off(obj->red);
 	Lamp_off(obj->green);
-	Lamp_flash(obj->yellow, 3);
+	Lamp_flash(obj->yellow, TL_FLASH_PERIOD);
 
 	Log_exit(PSTR("TL_yellowFlash"));
 }
