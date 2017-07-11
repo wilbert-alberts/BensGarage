@@ -100,8 +100,8 @@ Controller Controller_construct(char id, HSI_dio_struct openedSensor,
 
 	result->autoCloseTimer = Timer_construct(PSTR("controller::autoCloseTimer"));
   result->pulseCBTimer = Timer_construct(PSTR("controller::pulseCBTimer"));
-	CB_callbackClient cbAutoClose = { result, Controller_autoClose, NULL };
-  CB_callbackClient cbAutoCloseCB = { result, Controller_autoCloseCB, NULL };
+	CB_callbackClient cbAutoClose = { result, NULL, Controller_autoClose};
+  CB_callbackClient cbAutoCloseCB = { result, NULL, Controller_autoCloseCB};
   result->cbAutoClose = cbAutoClose;
   result->cbAutoCloseCB = cbAutoCloseCB;
   
@@ -203,12 +203,12 @@ static void Controller_State_Opening_Free(void* controller,
 
 	switch (event) {
 	case OPENED:
-    Logln(PSTR("Event: opened"));
+    Logln_P(PSTR("Event: opened"));
 		Timer_setTimer(obj->autoCloseTimer, &obj->cbAutoClose, AUTO_CLOSE_DOOR_TIMEOUT);
 		obj->handler = Controller_State_Opened_Free;
 		break;
 	case CLOSED:
-    Logln(PSTR("Event: closed"));
+    Logln_P(PSTR("Event: closed"));
 		CB_notify(&obj->cbOff);
 		obj->handler = Controller_State_Closed_Free;
 		break;
@@ -230,32 +230,32 @@ static void Controller_State_Opening_Free(void* controller,
 static void Controller_State_Opening_Blocked(void* controller,
     Controller_event_enum event) {
   Controller_struct* obj = (Controller_struct*) controller;
-  Log_entry(PSTR("Controller_State_Opening_Blocked"));
-  Log(PSTR(" id: ")); Logln(obj->id);
+  Log_entry_P(PSTR("Controller_State_Opening_Blocked"));
+  Log_P(PSTR(" id: ")); Logln(obj->id);
 
   switch (event) {
   case OPENED:
-    Logln(PSTR("Event: opened"));
+    Logln_P(PSTR("Event: opened"));
     obj->handler = Controller_State_Opened_Blocked;
     break;
   case CLOSED:
-    Logln(PSTR("Event: closed"));
+    Logln_P(PSTR("Event: closed"));
     CB_notify(&obj->cbYellowFlash);
     obj->handler = Controller_State_Closed_Blocked;
     break;
   case FREE:
-    Logln(PSTR("Event: free"));
+    Logln_P(PSTR("Event: free"));
     CB_notify(&obj->cbRed);
     obj->handler = Controller_State_Opening_Free;
     break;
   case BLOCKED:
   case IN_BETWEEN:
   default:
-    Log_error(PSTR("Controller_State_Opening_Blocked"), PSTR("Illegal event"));
+    Log_error_PP(PSTR("Controller_State_Opening_Blocked"), PSTR("Illegal event"));
     break;
   }
 
-  Log_exit(PSTR("Controller_State_Opening_Blocked"));
+  Log_exit_P(PSTR("Controller_State_Opening_Blocked"));
 }
 
 
@@ -340,7 +340,7 @@ static void Controller_State_Closing_Blocked(void* controller,
 	case IN_BETWEEN:
 	case BLOCKED:
 	default:
-		Log_error_P(PSTR("Controller_State_Closing_Blocked"), PSTR("Illegal event"));
+		Log_error_PP(PSTR("Controller_State_Closing_Blocked"), PSTR("Illegal event"));
 		break;
 	}
 

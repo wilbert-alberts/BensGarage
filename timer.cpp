@@ -42,32 +42,32 @@ Timer Timer_construct(const char* id) {
 }
 
 void Timer_setTimer(Timer timer, const CB_callbackClient* cb, uint32_t delta) {
-  Log_entry(PSTR("Timer_setTimer"));
+  Log_entry_P(PSTR("Timer_setTimer"));
 
 	Timer_struct* obj = (Timer_struct*)timer;
 	obj->remaining = delta;
 	CB_register(&obj->callback, cb->callback, cb->obj, cb->context);
-  Log_exit(PSTR("Timer_setTimer"));
+  Log_exit_P(PSTR("Timer_setTimer"));
 }
 
 void Timer_cancelTimer(Timer timer) {
-  Log_entry(PSTR("Timer_cancelTimer"));
+  Log_entry_P(PSTR("Timer_cancelTimer"));
 	Timer_struct* obj = (Timer_struct*)timer;
 	CB_unregister(&obj->callback);
-  Log_exit(PSTR("Timer_cancelTimer"));
+  Log_exit_P(PSTR("Timer_cancelTimer"));
 }
 
 void Timer_tick(Timer timer) {
 	Timer_struct* obj = (Timer_struct*)timer;
-  Log_P(PSTR("Ticking: "));
-  Log(obj->id);
+  //Log_P(PSTR("Ticking: "));
+  //Log(obj->id);
 	if (CB_isRegistered(&obj->callback)) {
 		obj->remaining--;
-  Log_P(PSTR(": "));
-    LogInt((int)obj->remaining);
+  //Log_P(PSTR(": "));
+    //LogInt((int)obj->remaining);
 		if (obj->remaining == 0) {
-      Log_P(PSTR(" - ALARM"));
-      Logln_P(PSTR("."));
+      //Log_P(PSTR(" - ALARM"));
+      //Logln_P(PSTR("."));
       
 			CB_callbackClient cb = obj->callback;
 			CB_unregister(&obj->callback);
@@ -75,7 +75,7 @@ void Timer_tick(Timer timer) {
 			CB_notify(&cb);
 		}
    else {
-    Logln(".");
+    //Logln(".");
    }
 	}
 }
@@ -84,7 +84,7 @@ void Timer_tickAllTimers()
 {
 	int i;
 
-//  Log_entry(PSTR("Timer_tickAllTimers"));
+//  Log_entry_P(PSTR("Timer_tickAllTimers"));
 	for (i=0; i<timer_nrTimers; i++) {
 		Timer_tick(&timer_Timers[i]);
 	}
