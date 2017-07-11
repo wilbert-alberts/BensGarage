@@ -24,15 +24,26 @@ typedef struct {
 	HSI_dio_struct ambient;
 	CB_callbackClient ambientOffCB;
 	Timer ambientTimer;
+
+  HSI_dio_struct powerledGreen;
+  HSI_dio_struct powerledRed;
 } LightMaster_struct;
 
 static void LM_ambientOn(LightMaster_struct* obj);
 static void LM_ambientOffCB(void* lm, void* context);
 static void LM_logSideAndState(LM_side_enum side, LM_trafficLightState state);
+static void LM_powerledGreen(LightMaster_struct* obj);
+static void LM_powerledRed(LightMaster_struct* obj);
 
 
-LightMaster LM_construct(HSI_dio_struct red, HSI_dio_struct yellow,
-		HSI_dio_struct green, HSI_dio_struct ambient) {
+LightMaster LM_construct(
+  HSI_dio_struct red, 
+  HSI_dio_struct yellow,
+	HSI_dio_struct green, 
+	HSI_dio_struct ambient,
+	HSI_dio_struct powerledGreen,
+	HSI_dio_struct powerledRed)
+{
 	Log_entry_P(PSTR("LM_construct"));
 
 	LightMaster_struct* result = (LightMaster_struct*) calloc(1,
@@ -48,6 +59,11 @@ LightMaster LM_construct(HSI_dio_struct red, HSI_dio_struct yellow,
 	result->ambientTimer = Timer_construct(PSTR("lightmaster::ambientTimer"));
 	CB_callbackClient cb = { result, NULL, LM_ambientOffCB };
 	result->ambientOffCB = cb;
+
+  result->powerledGreen = powerledGreen;
+  result->powerledRed = powerledRed;
+
+  LM_powerledGreen(result);
 
 	Log_exit_P(PSTR("LM_construct"));
 	return result;
@@ -124,6 +140,13 @@ void LM_setLight(LightMaster lm, LM_side_enum side, LM_trafficLightState state) 
 		}
 	}
 
+  if (newState == LM_OFF) {
+    LM_powerledGreen(obj);
+  }
+  else {
+    LM_powerledRed(obj);    
+  }
+
 	// Set traffic light
 	switch (newState) {
 	case LM_OFF:
@@ -136,6 +159,9 @@ void LM_setLight(LightMaster lm, LM_side_enum side, LM_trafficLightState state) 
 		TL_green(obj->trafficLight);
 		LM_ambientOn(obj);
     Logln_P(PSTR("Light set to Green"));
+    // Set powerled to red
+    HSI_writePin(obj->powerledGreen, 0);
+    HSI_writePin(obj->powerledRed, 1);
 		break;
 	case LM_YELLOW:
 		TL_yellow(obj->trafficLight);
@@ -195,4 +221,20 @@ static void LM_logSideAndState(LM_side_enum side, LM_trafficLightState state)
   if (state == LM_GREEN)
     Log_P(PSTR(" state: Green\n"));
 }
+
+static void LM_powerledRed(LightMaster_struct* obj)
+{
+    // Set powerled to red
+    HSI_writePin(obj->powerledGreen, 0);
+    HSI_writePin(obj->powerledRed, 1);  
+}
+
+static void LM_powerledGreen(LightMaster_struct* obj)
+{
+    // Set powerled to green
+    HSI_writePin(obj->powerledGreen, 1);
+    HSI_writePin(obj->powerledRed, 0);  
+}
+
+
 

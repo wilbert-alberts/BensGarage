@@ -30,6 +30,9 @@ typedef struct
 
 	HSI_dio_struct ambientLight;
 
+  HSI_dio_struct powerledGreen;
+  HSI_dio_struct powerledRed;
+
 } Garage_io_struct;
 
 extern Garage* Garage_construct(Garage_io_struct* io);

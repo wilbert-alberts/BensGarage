@@ -11,8 +11,7 @@
 #include "callback.h"
 #include "hsi.h"
 
-#define AUTO_CLOSE_DOOR_TIMEOUT TIMER_MINUTES(3)
-//#define AUTO_CLOSE_DOOR_TIMEOUT TIMER_SECONDS(10)
+#define AUTO_CLOSE_DOOR_TIMEOUT TIMER_MINUTES(3L)
 #define AUTO_CLOSE_DOOR_PULSE   TIMER_SECONDS(1)
 
 typedef void* Controller;

@@ -58,8 +58,13 @@ Garage* Garage_construct(Garage_io_struct* io) {
 			io->rightClosedSensor, io->rightGateSensor, io->rightRemote, cbRed,
 			cbYellow, cbYellowFlash, cbGreen, cbOff);
 
-	result->lm = LM_construct(io->trafficRed, io->trafficYellow,
-			io->trafficGreen, io->ambientLight);
+	result->lm = LM_construct(
+	  io->trafficRed, 
+	  io->trafficYellow,
+		io->trafficGreen, 
+		io->ambientLight,
+		io->powerledGreen,
+		io->powerledRed);
 
 	Log_exit_P(PSTR("Garage_construct"));
 	return (Garage*) result;

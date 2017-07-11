@@ -13,8 +13,7 @@
 
 typedef void* LightMaster;
 
-//#define LM_AMBIENT_OFF_TIMER TIMER_SECONDS(5) 
-#define LM_AMBIENT_OFF_TIMER TIMER_MINUTES(5) //  5 minutes
+#define LM_AMBIENT_OFF_TIMER TIMER_MINUTES(5L) //  5 minutes
 
 typedef enum
 {
@@ -33,7 +32,7 @@ typedef enum
 } LM_trafficLightState;
 
 
-LightMaster LM_construct(HSI_dio_struct red, HSI_dio_struct yellow, HSI_dio_struct green, HSI_dio_struct ambient);
+LightMaster LM_construct(HSI_dio_struct red, HSI_dio_struct yellow, HSI_dio_struct green, HSI_dio_struct ambient, HSI_dio_struct powerledGreen, HSI_dio_struct powerledRed);
 void LM_setLight(LightMaster lm, LM_side_enum side, LM_trafficLightState state);
 
 
