@@ -35,7 +35,7 @@ static void Garage_Green(void* obj, void* context);
 static void Garage_Off(void* obj, void* context);
 
 Garage* Garage_construct(Garage_io_struct* io) {
-	Log_entry(PSTR("Garage_construct"));
+	Log_entry_P(PSTR("Garage_construct"));
 
 	Garage_struct* result = (Garage_struct*) calloc(1, sizeof(Garage_struct));
 	CB_callbackClient cbRed = { result, GARAGE_LEFT, Garage_Red };
@@ -61,12 +61,12 @@ Garage* Garage_construct(Garage_io_struct* io) {
 	result->lm = LM_construct(io->trafficRed, io->trafficYellow,
 			io->trafficGreen, io->ambientLight);
 
-	Log_exit(PSTR("Garage_construct"));
+	Log_exit_P(PSTR("Garage_construct"));
 	return (Garage*) result;
 }
 
 static void Garage_Red(void* obj, void* context) {
-	Log_entry(PSTR("Garage_Red"));
+	Log_entry_P(PSTR("Garage_Red"));
 
 	Garage_struct* g = (Garage_struct*) obj;
 	if (context == GARAGE_LEFT) {
@@ -75,15 +75,14 @@ static void Garage_Red(void* obj, void* context) {
 		if (context == GARAGE_RIGHT) {
 			LM_setLight(g->lm, LM_RIGHT, LM_RED);
 		} else {
-			Log_error(PSTR("Garage_Red"),
-					PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
+			Log_error_PP(PSTR("Garage_Red"), PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
 		}
 	}
-	Log_exit(PSTR("Garage_Red"));
+	Log_exit_P(PSTR("Garage_Red"));
 }
 
 static void Garage_Yellow(void* obj, void* context) {
-	Log_entry(PSTR("Garage_Yellow"));
+	Log_entry_P(PSTR("Garage_Yellow"));
 
 	Garage_struct* g = (Garage_struct*) obj;
 	if (context == GARAGE_LEFT) {
@@ -92,15 +91,14 @@ static void Garage_Yellow(void* obj, void* context) {
 		if (context == GARAGE_RIGHT) {
 			LM_setLight(g->lm, LM_RIGHT, LM_YELLOW);
 		} else {
-			Log_error(PSTR("Garage_Yellow"),
-					PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
+			Log_error_PP(PSTR("Garage_Yellow"), PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
 		}
 	}
-	Log_exit(PSTR("Garage_Yellow"));
+	Log_exit_P(PSTR("Garage_Yellow"));
 }
 
 static void Garage_YellowFlash(void* obj, void* context) {
-	Log_entry(PSTR("Garage_YellowFlash"));
+	Log_entry_P(PSTR("Garage_YellowFlash"));
 
 	Garage_struct* g = (Garage_struct*) obj;
 	if (context == GARAGE_LEFT) {
@@ -109,16 +107,15 @@ static void Garage_YellowFlash(void* obj, void* context) {
 		if (context == GARAGE_RIGHT) {
 			LM_setLight(g->lm, LM_RIGHT, LM_YELLOW_FLASH);
 		} else {
-			Log_error(PSTR("Garage_YellowFlash"),
-					PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
+			Log_error_PP(PSTR("Garage_YellowFlash"), PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
 		}
 	}
 
-	Log_exit(PSTR("Garage_YellowFlash"));
+	Log_exit_P(PSTR("Garage_YellowFlash"));
 }
 
 static void Garage_Green(void* obj, void* context) {
-	Log_entry(PSTR("Garage_Green"));
+	Log_entry_P(PSTR("Garage_Green"));
 
 	Garage_struct* g = (Garage_struct*) obj;
 	if (context == GARAGE_LEFT) {
@@ -127,16 +124,15 @@ static void Garage_Green(void* obj, void* context) {
 		if (context == GARAGE_RIGHT) {
 			LM_setLight(g->lm, LM_RIGHT, LM_GREEN);
 		} else {
-			Log_error(PSTR("Garage_Green"),
-					PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
+			Log_error_PP(PSTR("Garage_Green"),PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
 		}
 	}
 
-	Log_exit(PSTR("Garage_Green"));
+	Log_exit_P(PSTR("Garage_Green"));
 }
 
 static void Garage_Off(void* obj, void* context) {
-	Log_entry(PSTR("Garage_Off"));
+	Log_entry_P(PSTR("Garage_Off"));
 
 	Garage_struct* g = (Garage_struct*) obj;
 	if (context == GARAGE_LEFT) {
@@ -145,10 +141,9 @@ static void Garage_Off(void* obj, void* context) {
 		if (context == GARAGE_RIGHT) {
 			LM_setLight(g->lm, LM_RIGHT, LM_OFF);
 		} else {
-			Log_error(PSTR("Garage_Off"),
-					PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
+			Log_error_PP(PSTR("Garage_Off"), PSTR("Illegal context, should be GARAGE_LEFT or GARAGE_RIGHT"));
 		}
 	}
 
-	Log_exit(PSTR("Garage_Off"));
+	Log_exit_P(PSTR("Garage_Off"));
 }

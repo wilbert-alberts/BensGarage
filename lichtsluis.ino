@@ -14,7 +14,7 @@ void setup() {
   //   Regular arduino runs 16 Mhz but this on 8. (another factor 2)
   Serial.begin(115200);
 
-  Logln(PSTR("Lichtsluis starting up"));
+  Logln_P(PSTR("Lichtsluis starting up"));
  
   Garage_io_struct io;
 
@@ -23,7 +23,7 @@ void setup() {
   Garage_construct(&io);
   installTimer();
 
-  Logln(PSTR("Lichtsluis started"));
+  Logln_P(PSTR("Lichtsluis started"));
 }
 
 void loop() {
@@ -33,7 +33,7 @@ void loop() {
 
 static void installTimer()
 {
-  Logln(PSTR("Installing timer"));
+  Logln_P(PSTR("Installing timer"));
   TCCR1A = 0;
   TCCR1B = 0;
   TCNT1 = 0;
@@ -46,7 +46,7 @@ static void installTimer()
   TCCR1A &= 0x00;
   
   TCCR1B |= _BV(CS12); // Start timer (by setting prescaler to 256)
-  Logln(PSTR("Timer started"));
+  Logln_P(PSTR("Timer started"));
 }
 
 ISR(TIMER1_COMPA_vect)
@@ -56,7 +56,7 @@ ISR(TIMER1_COMPA_vect)
 }
 
 static void initIO(Garage_io_struct* io) {
-  Logln(PSTR("Configure IO"));
+  Logln_P(PSTR("Configure IO"));
   io->ambientLight.port = &PORTC;
   io->ambientLight.pin = 3;
 
@@ -95,5 +95,5 @@ static void initIO(Garage_io_struct* io) {
 
   // All outputs are connected to port C
   DDRC = 0b00111111;
-  Logln(PSTR("IO Configured"));
+  Logln_P(PSTR("IO Configured"));
 }

@@ -19,14 +19,31 @@
 
 static char line[80];
 
-void Log(const char* msg) {
+#define LOGGING_ON
+
+
+#ifdef LOGGING_ON
+
+void Log_P(const char* msg) {
   strcpy_P(line, msg);
   Serial.print(line);
-  
+}
+
+void Log(const char* msg) {
+  Serial.print(msg);
 }
 
 void LogChar(char c) {
   Serial.print(c);
+}
+
+void LogInt(int i) {
+  Serial.print(i);
+}
+
+void Logln_P(const char* msg) {
+  Log_P(msg);
+  Serial.print("\r\n");
 }
 
 void Logln(const char* msg) {
@@ -42,21 +59,39 @@ void LogPort(const HSI_dio_struct* p)
   Serial.print(bfr);
 }
 
-void Log_entry(const char* f) {
-  Log(f);
-  Logln(PSTR(" >()"));
+void Log_entry_P(const char* f) {
+  Log_P(f);
+  Logln_P(PSTR(" >()"));
 }
 
-void Log_exit(const char* f) {
-  Log(f);
-  Logln(PSTR(" <()"));
+void Log_exit_P(const char* f) {
+  Log_P(f);
+  Logln_P(PSTR(" <()"));
 }
 
-void Log_error(const char* f, const char* msg) {
-  Log(PSTR("Error in "));
-  Log(f);
-  Log(PSTR(": "));
-  Logln(msg);
+void Log_error_PP(const char* f, const char* msg) {
+  Log_P(PSTR("Error in "));
+  Log_P(f);
+  Log_P(PSTR(": "));
+  Logln_P(msg);
 }
+
+#else
+
+void Log(const char* msg) {}
+void Log_P(const char* msg) {}
+void LogChar(char c) {}
+void LogInt(int i) {}
+void Logln(const char* msg) {}
+void Logln_P(const char* msg) {}
+void LogPort(const HSI_dio_struct* p) {}
+
+void Log_entry_P(const char* f) {}
+void Log_exit_P(const char* f) {}
+
+void Log_error_PP(const char* f, const char* msg) {}
+
+
+#endif
 
 #endif /* LOG_H_ */

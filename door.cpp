@@ -40,7 +40,7 @@ Door Door_construct(char id, const CB_callbackClient* openedCB,
 		const CB_callbackClient* inbetweenCB, const CB_callbackClient* closedCB,
 		HSI_dio_struct openedSensor, HSI_dio_struct closedSensor) {
 
-	Log_entry(PSTR("Door_construct"));
+	Log_entry_P(PSTR("Door_construct"));
 
 	Door_struct* result = (Door_struct*) calloc(1, sizeof(Door_struct));
 
@@ -75,12 +75,12 @@ Door Door_construct(char id, const CB_callbackClient* openedCB,
 	result->openedSensor = Debouncer_construct(&cbOpenedHigh, &cbOpenedLow,
 			openedSensor);
 
-	Log_exit(PSTR("Door_construct"));
+	Log_exit_P(PSTR("Door_construct"));
 	return (Door) result;
 }
 
 static void Door_sensorLow(void* obj, void* context) {
-	Log_entry(PSTR("Door_sensorLow"));
+	Log_entry_P(PSTR("Door_sensorLow"));
 
 	Door_struct* door = (Door_struct*) obj;
 
@@ -95,15 +95,14 @@ static void Door_sensorLow(void* obj, void* context) {
     Log("\n");
 		CB_notify(&door->closedCB);
 	} else {
-		Log_error(PSTR("Door_sensorLow"),
-				PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
+		Log_error_PP(PSTR("Door_sensorLow"), PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
 	}
 
-	Log_exit(PSTR("Door_sensorLow"));
+	Log_exit_P(PSTR("Door_sensorLow"));
 }
 
 static void Door_sensorHigh(void* obj, void* context) {
-	Log_entry(PSTR("Door_sensorHigh"));
+	Log_entry_P(PSTR("Door_sensorHigh"));
 
 	Door_struct* door = (Door_struct*) obj;
 
@@ -114,9 +113,8 @@ static void Door_sensorHigh(void* obj, void* context) {
     Log("\n");
 		CB_notify(&door->inbetweenCB);
 	} else {
-		Log_error(PSTR("Door_sensorHigh"),
-				PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
+		Log_error_PP(PSTR("Door_sensorHigh"), PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
 	}
 
-	Log_exit(PSTR("Door_sensorHigh"));
+	Log_exit_P(PSTR("Door_sensorHigh"));
 }

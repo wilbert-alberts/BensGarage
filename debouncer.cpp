@@ -44,7 +44,7 @@ Debouncer Debouncer_construct(const CB_callbackClient* whenHigh,
 
 		return (Debouncer) result;
 	} else {
-		Log_error(__func__, "Not enough debouncers");
+		Log_error_PP(PSTR("Debouncer_construct"), PSTR("Not enough debouncers"));
 		return NULL;
 	}
 }
@@ -60,15 +60,15 @@ void Debouncer_sample(Debouncer debouncer) {
 		obj->remaining--;
 		if (obj->remaining == 0) {
 			if (v == 0) {
-        Log(PSTR("Debouncer "));
+        Log_P(PSTR("Debouncer "));
         LogPort(&obj->io);
-        Logln(PSTR(" gone low"));
+        Logln_P(PSTR(" gone low"));
 				CB_notify(&obj->whenLowCB);
 			}
 			if (v == 1) {
-        Log(PSTR("Debouncer "));
+        Log_P(PSTR("Debouncer "));
         LogPort(&obj->io);
-        Logln(PSTR(" gone high"));
+        Logln_P(PSTR(" gone high"));
 				CB_notify(&obj->whenHighCB);
 			}
 			obj->value = v;

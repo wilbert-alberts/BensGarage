@@ -15,26 +15,28 @@
 
 typedef struct
 {
+  const char* id;
+  
 	uint32_t remaining;
 
 	CB_callbackClient callback;
-
 } Timer_struct;
 
 static Timer_struct timer_Timers[TIMER_NRTIMERS];
 static int timer_nrTimers = 0;
 
-Timer Timer_construct() {
+Timer Timer_construct(const char* id) {
 	if (timer_nrTimers < TIMER_NRTIMERS) {
 
 		Timer_struct* result = &timer_Timers[timer_nrTimers++];
 
+    result->id = id;
 		result->remaining = 0;
 		CB_unregister(&result->callback);
 
 		return (Timer)result;
 	} else {
-		Log_error(__func__, "Not enough timers");
+		Log_error_PP(PSTR("Timer_construct"), PSTR("Not enough timers"));
 		return NULL;
 	}
 }
@@ -57,15 +59,24 @@ void Timer_cancelTimer(Timer timer) {
 
 void Timer_tick(Timer timer) {
 	Timer_struct* obj = (Timer_struct*)timer;
+  Log_P(PSTR("Ticking: "));
+  Log(obj->id);
 	if (CB_isRegistered(&obj->callback)) {
 		obj->remaining--;
+  Log_P(PSTR(": "));
+    LogInt((int)obj->remaining);
 		if (obj->remaining == 0) {
-      Logln(PSTR("Timer_tick - ALARM"));
+      Log_P(PSTR(" - ALARM"));
+      Logln_P(PSTR("."));
+      
 			CB_callbackClient cb = obj->callback;
 			CB_unregister(&obj->callback);
 
 			CB_notify(&cb);
 		}
+   else {
+    Logln(".");
+   }
 	}
 }
 

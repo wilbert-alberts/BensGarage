@@ -10,6 +10,8 @@
 
 #include "hsi.h"
 
+#define TL_FLASH_PERIOD TIMER_MS(250)
+
 typedef void* TrafficLight;
 
 TrafficLight TL_construct(HSI_dio_struct red, HSI_dio_struct yellow, HSI_dio_struct green);

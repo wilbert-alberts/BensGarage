@@ -13,7 +13,7 @@
 
 typedef void* LightMaster;
 
-#define LM_AMBIENT_OFF_TIMER (TIMER_MINUTES(5)) //  5 minutes
+#define LM_AMBIENT_OFF_TIMER TIMER_SECONDS(5) //  5 minutes
 
 typedef enum
 {
