@@ -93,7 +93,16 @@ static void initIO(Garage_io_struct* io) {
   io->trafficGreen.port = &PORTC;
   io->trafficGreen.pin = 2;
 
-  // All outputs are connected to port C
+  io->powerledRed.port = &PORTB;
+  io->powerledRed.pin = 1;
+
+  io->powerledGreen.port = &PORTB;
+  io->powerledGreen.pin = 2;
+
+
+  // All outputs are connected to port C and B
   DDRC = 0b00111111;
+  DDRB = 0b00000110;
+  
   Logln_P(PSTR("IO Configured"));
 }

@@ -1,0 +1,34 @@
+@startuml
+[*] --> ClosedFree
+
+ClosedFree --> OpeningFree : inbetween (green; ambientOn; cancelTimer) 
+ClosedFree --> ClosedBlocked: blocked (yellowFlash; cancelTimer)
+ClosedFree --> ClosedFree: timout (ambientOff)
+
+OpeningFree --> OpenFree: opened (startTimer) 
+OpeningFree --> ClosedFree: closed (off; startTimer) 
+OpeningFree --> OpeningBlocked: blocked (yellow) 
+
+OpeningBlocked --> OpenBlocked: opened ()
+OpeningBlocked --> ClosedBlocked: closed (yellowFlash)
+OpeningBlocked --> OpeningFree: free (red)
+
+ClosedBlocked --> OpeningBlocked: inbetween(ambientOn)
+ClosedBlocked --> ClosedFree: free (off; startTimer)
+
+OpenFree --> ClosingFree : inbetween(off; cancelTimer)
+OpenFree --> OpenBlocked : blocked (yellow; cancelTimer)
+OpenFree --> OpenFree: timeout (sendTrigger)
+
+OpenBlocked --> ClosingBlocked: inbetween (yellowFlash)
+OpenBlocked --> OpenFree: free (red; startTimer)
+
+ClosingFree --> OpenFree: opened (startTimer)
+ClosingFree --> ClosedFree: closed (off; startTimer) 
+ClosingFree --> ClosingBlocked: blocked (yellowFlash)
+
+ClosingBlocked --> OpenBlocked: opened ()
+ClosingBlocked --> ClosedBlocked: closed (yellowFlash)
+ClosingBlocked --> ClosingFree: free (off)
+
+@enduml
