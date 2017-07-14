@@ -84,20 +84,16 @@ static void Door_sensorLow(void* obj, void* context) {
 
 	Door_struct* door = (Door_struct*) obj;
 
-	if (context == CONTEXT_OPENED_SENSOR) {
-    Log("Door opened ");
+  if ((context == CONTEXT_CLOSED_SENSOR)
+      || (context == CONTEXT_OPENED_SENSOR)) {
+    Log("Door moving (transient) ");
     LogChar(door->id);
     Log("\n");
-		CB_notify(&door->openedCB);
-	} else if (context == CONTEXT_CLOSED_SENSOR) {
-    Log("Door closed ");
-    LogChar(door->id);
-    Log("\n");
-		CB_notify(&door->closedCB);
-	} else {
-		Log_error_PP(PSTR("Door_sensorLow"), PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
-	}
-
+    CB_notify(&door->inbetweenCB);
+  } else {
+    Log_error_PP(PSTR("Door_sensorHigh"), PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
+  }
+  
 	Log_exit_P(PSTR("Door_sensorLow"));
 }
 
@@ -106,15 +102,19 @@ static void Door_sensorHigh(void* obj, void* context) {
 
 	Door_struct* door = (Door_struct*) obj;
 
-	if ((context == CONTEXT_CLOSED_SENSOR)
-			|| (context == CONTEXT_OPENED_SENSOR)) {
-    Log("Door moving (transient) ");
+  if (context == CONTEXT_OPENED_SENSOR) {
+    Log("Door opened ");
     LogChar(door->id);
     Log("\n");
-		CB_notify(&door->inbetweenCB);
-	} else {
-		Log_error_PP(PSTR("Door_sensorHigh"), PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
-	}
-
+    CB_notify(&door->openedCB);
+  } else if (context == CONTEXT_CLOSED_SENSOR) {
+    Log("Door closed ");
+    LogChar(door->id);
+    Log("\n");
+    CB_notify(&door->closedCB);
+  } else {
+    Log_error_PP(PSTR("Door_sensorLow"), PSTR("Illegal context, should  be CONTEXT_OPENED_SENSOR or CONTEXT_CLOSED_SENSOR"));
+  }
+  
 	Log_exit_P(PSTR("Door_sensorHigh"));
 }
